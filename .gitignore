@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+
+# Secretos y datos de jugadores: nunca al repositorio (INSTRUCCIONES.md §4.4, §4.5)
+.env
+.env.local
+.env*.local
+.data/
+
+*.tsbuildinfo
+next-env.d.ts

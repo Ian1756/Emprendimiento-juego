@@ -1,0 +1,10 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
+    "@typescript-eslint/no-explicit-any": "error",
+    "eqeqeq": ["error", "always"],
+    "no-var": "error",
+    "prefer-const": "error"
+  }
+}
