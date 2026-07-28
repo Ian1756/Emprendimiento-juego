@@ -308,6 +308,14 @@ aproximado). No hay endpoint que diga "¿existe este correo?".
 
 ### 4.8 Cabeceras y transporte
 - HTTPS forzado + HSTS.
+- **TLS con la base de datos.** Por defecto se verifica el certificado contra
+  las CA del sistema. El pooler de Supabase presenta una cadena que Node no
+  puede validar, así que el despliegue usa `DATABASE_SSL_MODE=no-verify`: el
+  tráfico sigue cifrado pero no se autentica al servidor (mismo nivel que el
+  `sslmode=require` que documenta Supabase). Riesgo aceptado y consciente. Para
+  cerrarlo del todo, descarga el certificado de Supabase (Settings → Database →
+  SSL Configuration) y pásalo en `DATABASE_CA_CERT`: eso restaura la
+  verificación completa. `/api/health` reporta en qué modo está.
 - CSP estricta. **`'unsafe-eval'` solo en desarrollo**: el bundle de dev de Next
   evalúa strings y sin ese permiso React no hidrata — la página carga pero
   ningún botón responde (bug real, ya corregido en `next.config.mjs`). En

@@ -6,6 +6,7 @@
  */
 import { NextResponse } from 'next/server';
 import { getStore } from '@/lib/server/store';
+import { describeSsl } from '@/lib/server/store/pool';
 import { checkRateLimit, clientIp } from '@/lib/server/rateLimit';
 import { logServerError, tooManyRequests } from '@/lib/server/http';
 
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
     sessionSecretConfigurado: Boolean(process.env.SESSION_SECRET),
     databaseUrlConfigurada: Boolean(process.env.DATABASE_URL),
     whatsappConfigurado: !(process.env.NEXT_PUBLIC_WHATSAPP_URL ?? '').includes('PENDIENTE'),
+    tls: describeSsl(),
     baseDeDatos: 'sin probar' as string,
     problema: null as string | null,
   };

@@ -16,8 +16,21 @@ import { Pool, type PoolConfig } from 'pg';
  */
 function sslConfig(esLocal: boolean): PoolConfig['ssl'] {
   if (esLocal) return undefined;
+
+  // Mejor opción: verificación completa contra la CA de Supabase
+  // (Settings → Database → SSL Configuration → Download certificate).
+  const ca = process.env.DATABASE_CA_CERT;
+  if (ca) return { ca, rejectUnauthorized: true };
+
   if (process.env.DATABASE_SSL_MODE === 'no-verify') return { rejectUnauthorized: false };
   return { rejectUnauthorized: true };
+}
+
+/** Cómo quedó configurado el TLS. Lo reporta /api/health para poder auditarlo. */
+export function describeSsl(): string {
+  if (process.env.DATABASE_CA_CERT) return 'cifrado y verificado con CA propia';
+  if (process.env.DATABASE_SSL_MODE === 'no-verify') return 'cifrado, sin verificar el servidor';
+  return 'cifrado y verificado con las CA del sistema';
 }
 
 export function poolConfig(connectionString: string): PoolConfig {
