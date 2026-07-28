@@ -5,10 +5,21 @@
 import { Pool, type PoolConfig } from 'pg';
 
 /**
- * Supabase exige TLS. Verificamos el certificado contra las CA del sistema
- * salvo que la conexión sea local. No usamos rejectUnauthorized:false: eso
- * apagaría la protección contra intermediarios (§4.8).
+ * TLS de la conexión a la base — INSTRUCCIONES.md §4.8.
+ *
+ * Por defecto verificamos el certificado contra las CA del sistema. Algunos
+ * poolers presentan una cadena que Node no puede validar; para ese caso existe
+ * DATABASE_SSL_MODE=no-verify, que mantiene el tráfico cifrado pero deja de
+ * autenticar al servidor. Es una degradación real: úsala solo si el
+ * diagnóstico (/api/health) reporta un problema de certificado, y déjala
+ * documentada en el hosting.
  */
+function sslConfig(esLocal: boolean): PoolConfig['ssl'] {
+  if (esLocal) return undefined;
+  if (process.env.DATABASE_SSL_MODE === 'no-verify') return { rejectUnauthorized: false };
+  return { rejectUnauthorized: true };
+}
+
 export function poolConfig(connectionString: string): PoolConfig {
   const esLocal =
     connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
@@ -19,7 +30,7 @@ export function poolConfig(connectionString: string): PoolConfig {
 
   return {
     connectionString,
-    ssl: esLocal ? undefined : { rejectUnauthorized: true },
+    ssl: sslConfig(esLocal),
     max: esServerless ? 1 : 5,
     // El pooler de Supabase corta conexiones inactivas; no las retengamos.
     idleTimeoutMillis: 10_000,

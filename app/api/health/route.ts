@@ -24,7 +24,10 @@ function explicar(mensaje: string): string {
     [/password authentication failed|SASL|SCRAM/i, 'La contraseña de DATABASE_URL es incorrecta o falta codificar un carácter especial.'],
     [/ENOTFOUND|EAI_AGAIN|getaddrinfo/i, 'El host de DATABASE_URL no resuelve: revisa que copiaste la URI completa.'],
     [/ETIMEDOUT|timeout/i, 'La base no respondió a tiempo: usa el pooler de Supabase, no la conexión directa.'],
-    [/self.signed|certificate/i, 'Problema con el certificado TLS de la base.'],
+    [
+      /self.signed|certificate|CERT_/i,
+      'El certificado TLS de la base no se puede verificar: agrega DATABASE_SSL_MODE=no-verify en el hosting y redespliega.',
+    ],
     [/Falta DATABASE_URL/i, 'Falta la variable DATABASE_URL en el hosting.'],
   ];
 
