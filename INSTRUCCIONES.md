@@ -153,6 +153,7 @@ app/
     sessions/route.ts      → abre una partida, genera la semilla en el servidor
     scores/route.ts        → re-simula, valida y guarda el puntaje
     leaderboard/route.ts   → Top 5 público (solo lectura)
+    health/route.ts        → diagnóstico de configuración (solo booleanos, §4.9)
 components/
   Juego.tsx                → máquina de pantallas (registro→inicio→jugando→resultado)
   PantallaRegistro.tsx  PantallaInicio.tsx  PantallaJuego.tsx  PantallaResultado.tsx
@@ -177,7 +178,10 @@ estado y metería latencia); la única ruta real es `/`.
 
 **Persistencia:** la app habla con la interfaz `Store`. Si hay `DATABASE_URL` usa
 Postgres; si no, un archivo JSON local (`.data/db.json`), suficiente para
-desarrollo y para un evento servido por una sola instancia. El archivo contiene
+desarrollo. **En producción `DATABASE_URL` es obligatoria**: el almacén en
+archivo no funciona en un hosting serverless (sistema de archivos de solo
+lectura y una instancia distinta por petición), así que `getStore()` falla
+con un mensaje explícito en vez de dar un 500 sin explicación. El archivo contiene
 datos personales: está en `.gitignore` y no debe copiarse a ningún lado (§4.5).
 
 **Regla de capas:** `lib/game/*` es **puro** — sin `window`, sin `fetch`, sin React,

@@ -77,6 +77,16 @@ responsable de los datos (§4.5 de INSTRUCCIONES.md).
 3. Despliega y prueba el flujo completo desde un celular antes del evento.
 4. Genera el QR apuntando a la URL final de Vercel (o a tu dominio propio).
 
+## Diagnóstico de un despliegue
+
+Si el juego falla en producción, abre `https://TU-URL/api/health`. Responde solo
+con booleanos (nunca secretos ni datos de jugadores) y dice qué falta:
+
+```json
+{ "ok": false, "databaseUrlConfigurada": true, "baseDeDatos": "falla",
+  "problema": "Las tablas no existen: aplica db/schema.sql en el SQL Editor de Supabase." }
+```
+
 ## El QR
 
 Apunta el QR a la URL pública del juego, **sin tokens ni datos en la URL**
