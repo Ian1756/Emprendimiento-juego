@@ -9,7 +9,16 @@ import { setSessionCookie } from '@/lib/server/session';
 import { getStore } from '@/lib/server/store';
 import { firstIssueMessage, registerSchema } from '@/lib/server/validation';
 
-const LIMIT_PER_HOUR = 5;
+/**
+ * Límite por IP alto a propósito — INSTRUCCIONES.md §4.3.
+ *
+ * En un evento presencial TODA la sala sale por la misma IP pública del WiFi
+ * del campus. Un límite bajo aquí no frena a un atacante (le basta cambiar de
+ * red) pero sí deja fuera a la fila entera de asistentes: con 5/hora, la sexta
+ * persona en registrarse ya no podía jugar. Lo que de verdad acota el abuso es
+ * el tope de 2 partidas por jugador, que va por cuenta y no por IP.
+ */
+const LIMIT_PER_HOUR = 400;
 const ONE_HOUR_SECONDS = 60 * 60;
 
 export async function POST(request: Request) {

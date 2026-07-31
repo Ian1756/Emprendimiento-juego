@@ -7,7 +7,13 @@ import { checkRateLimit, clientIp } from '@/lib/server/rateLimit';
 import { currentPlayerId } from '@/lib/server/session';
 import { getStore } from '@/lib/server/store';
 
-const LIMIT_PER_MINUTE = 60;
+/**
+ * Alto por la misma razón que en /api/players: toda la sala comparte la IP del
+ * WiFi. Además el tablero proyectado consulta cada 4 s (15/min) y cada jugador
+ * consulta al entrar y al terminar. Es una lectura pública sin datos
+ * personales, así que el riesgo de un límite generoso es bajo.
+ */
+const LIMIT_PER_MINUTE = 600;
 const ONE_MINUTE_SECONDS = 60;
 
 export async function GET(request: Request) {

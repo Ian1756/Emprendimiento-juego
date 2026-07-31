@@ -326,10 +326,23 @@ El navegador puede mandar `score: 999999999`. Por eso:
 ### 4.3 Rate limiting y abuso
 | Endpoint | Límite |
 |---|---|
-| `POST /api/players` | 5 / hora por IP |
-| `POST /api/sessions` | 20 / hora por jugador |
+| `POST /api/players` | 400 / hora por IP |
+| `POST /api/sessions` | 20 / hora por jugador · **máx. 2 partidas en total** (§2.8) |
 | `POST /api/scores` | 1 por sesión (único), 20 / hora por jugador |
-| `GET /api/leaderboard` | 60 / minuto por IP, con caché de 5–10 s |
+| `GET /api/leaderboard` | 600 / minuto por IP |
+
+**Los límites por IP van altos a propósito.** En un evento presencial toda la
+sala sale por la misma IP pública del WiFi del campus. Un límite bajo no frena a
+un atacante —le basta cambiar de red— pero sí deja fuera a la fila entera de
+asistentes. *Bug real del 2026-07-31: con 5 registros/hora por IP, la sexta
+persona en registrarse ya no podía jugar; 12 registros simultáneos devolvieron
+12 veces `429`.* Lo que de verdad acota el abuso son los límites **por cuenta**:
+el tope de 2 partidas y el de un puntaje por sesión.
+
+**Ojo con escalar:** el contador vive en memoria del proceso. En Vercel, con
+varias instancias, cada una lleva su propio conteo y el límite efectivo se
+multiplica. Si algún día importa que el límite sea exacto, hay que moverlo a un
+contador compartido (Redis/Upstash) sin cambiar la interfaz de `rateLimit.ts`.
 
 Al superarse: `429` con mensaje neutro. Registrar el evento, no el contenido.
 
