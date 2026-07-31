@@ -140,11 +140,10 @@ duplicados en cliente y servidor por copiar-pegar.
 - Muestra exactamente los mismos datos que el leaderboard del juego: nombre,
   empresa y puntaje. Nada de correo ni matrícula (§4.5).
 - No se indexa en buscadores (`robots: noindex`).
-- **Subdominio:** si existe la variable `LEADERBOARD_HOST`, cualquier petición a
-  ese host sirve el tablero, sin importar la ruta. Así una pantalla proyectada
-  no puede acabar en el formulario de registro por un clic accidental. Las
-  rutas `/api/*` siguen respondiendo igual en ambos hosts, porque el tablero
-  las necesita para refrescarse.
+- **Decisión del 2026-07-27:** se sirve solo como ruta, sin subdominio propio.
+  Un subdominio real exige un dominio propio y no aportaba nada al evento. Si
+  algún día hace falta, el middleware que lo resolvía está en el historial de
+  git (commit `b335aa2`).
 
 ---
 
@@ -161,7 +160,6 @@ Stack asumido (si se cambia, se actualiza esta sección **antes** de escribir c�
 - **Hosting:** Vercel. HTTPS obligatorio.
 
 ```
-middleware.ts              → rutea LEADERBOARD_HOST al tablero en vivo (§2.7)
 app/
   page.tsx                 → server component: decide registro vs inicio y precarga el Top 5
   tablero/                 → Top 5 a pantalla completa para proyectar (§2.7)

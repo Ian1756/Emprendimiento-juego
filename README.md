@@ -83,24 +83,8 @@ responsable de los datos (§4.5 de INSTRUCCIONES.md).
 cada 4 segundos y resalta a quien acaba de entrar. Pensado para una pantalla o
 proyector durante el evento (pon el navegador en pantalla completa con `F11`).
 
-### Servirlo en un subdominio propio
-
-1. En Vercel → tu proyecto → **Settings → Domains**, agrega el subdominio
-   (por ejemplo `tablero.tudominio.mx`) y sigue las instrucciones de DNS.
-2. Agrega la variable de entorno `LEADERBOARD_HOST` con **exactamente** ese
-   host, sin `https://` ni barra final:
-   ```
-   LEADERBOARD_HOST=tablero.tudominio.mx
-   ```
-3. Redespliega.
-
-Desde ese host, **cualquier** ruta muestra el tablero: nadie puede acabar en el
-formulario de registro por un clic accidental en la pantalla proyectada. El
-dominio principal sigue sirviendo el juego con normalidad.
-
-Si no tienes dominio propio, puedes agregarle al proyecto un segundo dominio
-`.vercel.app` (por ejemplo `tablero-emprendimiento.vercel.app`) en la misma
-pantalla de **Domains** y usarlo como `LEADERBOARD_HOST`.
+Consejo para el evento: deja esa pestaña abierta en la máquina que proyecta y
+no la toques. Se refresca sola; no hace falta recargar ni volver a entrar.
 
 ## Diagnóstico de un despliegue
 
