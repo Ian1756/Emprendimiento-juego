@@ -132,6 +132,20 @@ duplicados en cliente y servidor por copiar-pegar.
 4. El puntaje se guarda siempre; se **muestra** públicamente solo si entra al Top 5.
 5. Se conserva el **mejor puntaje por jugador** (no se acumulan intentos).
 
+### 2.7 Tablero en vivo (pantalla del evento)
+- Ruta `/tablero`: el Top 5 a pantalla completa, pensado para proyectar.
+- Se refresca solo cada 4 s consultando `/api/leaderboard`; **no** recarga la
+  página. Si la red falla, conserva el último tablero y avisa en el pie.
+- Resalta durante 8 s a quien acaba de entrar o cambiar de puesto.
+- Muestra exactamente los mismos datos que el leaderboard del juego: nombre,
+  empresa y puntaje. Nada de correo ni matrícula (§4.5).
+- No se indexa en buscadores (`robots: noindex`).
+- **Subdominio:** si existe la variable `LEADERBOARD_HOST`, cualquier petición a
+  ese host sirve el tablero, sin importar la ruta. Así una pantalla proyectada
+  no puede acabar en el formulario de registro por un clic accidental. Las
+  rutas `/api/*` siguen respondiendo igual en ambos hosts, porque el tablero
+  las necesita para refrescarse.
+
 ---
 
 ## 3. Arquitectura
@@ -147,8 +161,10 @@ Stack asumido (si se cambia, se actualiza esta sección **antes** de escribir c�
 - **Hosting:** Vercel. HTTPS obligatorio.
 
 ```
+middleware.ts              → rutea LEADERBOARD_HOST al tablero en vivo (§2.7)
 app/
   page.tsx                 → server component: decide registro vs inicio y precarga el Top 5
+  tablero/                 → Top 5 a pantalla completa para proyectar (§2.7)
   aviso-de-privacidad/     → texto legal (§4.5)
   api/
     players/route.ts       → alta/reuso por correo, emite cookie de sesión

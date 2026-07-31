@@ -77,6 +77,31 @@ responsable de los datos (§4.5 de INSTRUCCIONES.md).
 3. Despliega y prueba el flujo completo desde un celular antes del evento.
 4. Genera el QR apuntando a la URL final de Vercel (o a tu dominio propio).
 
+## Tablero en vivo para proyectar
+
+`https://TU-URL/tablero` muestra el Top 5 a pantalla completa, se refresca solo
+cada 4 segundos y resalta a quien acaba de entrar. Pensado para una pantalla o
+proyector durante el evento (pon el navegador en pantalla completa con `F11`).
+
+### Servirlo en un subdominio propio
+
+1. En Vercel → tu proyecto → **Settings → Domains**, agrega el subdominio
+   (por ejemplo `tablero.tudominio.mx`) y sigue las instrucciones de DNS.
+2. Agrega la variable de entorno `LEADERBOARD_HOST` con **exactamente** ese
+   host, sin `https://` ni barra final:
+   ```
+   LEADERBOARD_HOST=tablero.tudominio.mx
+   ```
+3. Redespliega.
+
+Desde ese host, **cualquier** ruta muestra el tablero: nadie puede acabar en el
+formulario de registro por un clic accidental en la pantalla proyectada. El
+dominio principal sigue sirviendo el juego con normalidad.
+
+Si no tienes dominio propio, puedes agregarle al proyecto un segundo dominio
+`.vercel.app` (por ejemplo `tablero-emprendimiento.vercel.app`) en la misma
+pantalla de **Domains** y usarlo como `LEADERBOARD_HOST`.
+
 ## Diagnóstico de un despliegue
 
 Si el juego falla en producción, abre `https://TU-URL/api/health`. Responde solo
