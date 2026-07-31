@@ -21,6 +21,7 @@ import { companyFor } from '../lib/game/company';
 import { Rng } from '../lib/game/rng';
 import { GAME_RULES, TILE_COUNT, dominantColorIndex } from '../lib/game/rules';
 import { cellsClearedByRuns, pointsForRuns } from '../lib/game/scoring';
+import { registerSchema } from '../lib/server/validation';
 
 function boardOfColor(color: number): Board {
   return new Array<number>(TILE_COUNT).fill(color);
@@ -169,6 +170,34 @@ test('el rubro sale del color dominante y desempata de forma determinista', () =
 
 test('un tablero de un solo color siempre tiene movimientos', () => {
   assert.equal(hasAnyLegalSwap(boardOfColor(2)), true);
+});
+
+const REGISTRO_BASE = {
+  name: 'Ana Prueba',
+  email: 'ana@ejemplo.mx',
+  consent: true as const,
+};
+
+test('la matrícula es obligatoria y debe empezar con A0', () => {
+  const validas = ['A01234567', 'a01234567', ' a01234567 ', 'A0123456'];
+  for (const matricula of validas) {
+    const resultado = registerSchema.safeParse({ ...REGISTRO_BASE, matricula });
+    assert.equal(resultado.success, true, `deberia aceptar ${matricula}`);
+  }
+
+  const invalidas = ['', 'B01234567', 'A1234567', '01234567', 'A0', 'A0abcdefg', 'A0123'];
+  for (const matricula of invalidas) {
+    const resultado = registerSchema.safeParse({ ...REGISTRO_BASE, matricula });
+    assert.equal(resultado.success, false, `deberia rechazar ${matricula}`);
+  }
+
+  // Falta el campo por completo
+  assert.equal(registerSchema.safeParse(REGISTRO_BASE).success, false);
+});
+
+test('la matrícula se guarda normalizada en mayúsculas', () => {
+  const resultado = registerSchema.safeParse({ ...REGISTRO_BASE, matricula: 'a01234567' });
+  assert.equal(resultado.success && resultado.data.matricula, 'A01234567');
 });
 
 /** Juega n movimientos legales buscando el primero disponible en cada turno. */

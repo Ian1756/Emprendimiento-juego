@@ -29,6 +29,7 @@ interface PlayerRow {
   id: string;
   display_name: string;
   email: string;
+  matricula: string | null;
   consent_at: Date;
   created_at: Date;
 }
@@ -60,6 +61,7 @@ function toPlayer(row: PlayerRow): Player {
     id: row.id,
     displayName: row.display_name,
     email: row.email,
+    matricula: row.matricula,
     consentAt: row.consent_at.toISOString(),
     createdAt: row.created_at.toISOString(),
   };
@@ -110,12 +112,12 @@ export const postgresStore: Store = {
     return row ? toPlayer(row) : null;
   },
 
-  async createPlayer({ displayName, email }) {
+  async createPlayer({ displayName, email, matricula }) {
     const result = await db().query<PlayerRow>(
-      `insert into players (display_name, email, consent_at)
-       values ($1, $2, now())
+      `insert into players (display_name, email, matricula, consent_at)
+       values ($1, $2, $3, now())
        returning *`,
-      [displayName, email],
+      [displayName, email, matricula],
     );
     const row = result.rows[0];
     if (!row) throw new Error('No se pudo crear el jugador.');

@@ -51,7 +51,9 @@ Restricciones de diseño que se derivan de eso:
 ```
 
 ### 2.1 Registro (solo la primera vez)
-- Campos: **nombre** (2–40 caracteres) y **correo electrónico**.
+- Campos: **nombre** (2–40 caracteres), **matrícula** y **correo electrónico**.
+- La matrícula es obligatoria y debe cumplir `^A0\d{5,9}$` (se acepta `a0…` y se
+  normaliza a mayúsculas). Ejemplo: `A01234567`.
 - Checkbox **explícito** de aviso de privacidad (no premarcado). Sin él, no se envía.
 - Al enviarse correctamente, el servidor crea el jugador y devuelve una **sesión
   persistente** (cookie `HttpOnly`). El usuario **no vuelve a registrarse** en ese
@@ -195,6 +197,8 @@ players (
   id            uuid primary key,
   display_name  text not null,        -- nombre mostrado en el leaderboard
   email         text not null,        -- PRIVADO, nunca sale en una API pública
+  matricula     text,                 -- PRIVADO igual que el correo (nullable:
+                                      -- los registros anteriores no la tienen)
   consent_at    timestamptz not null,
   created_at    timestamptz not null default now()
 )
@@ -286,9 +290,15 @@ Al superarse: `429` con mensaje neutro. Registrar el evento, no el contenido.
   datos (Tec CEM / la organización responsable), para qué (contacto sobre
   emprendimiento), y cómo ejercer derechos ARCO.
 - Consentimiento **explícito y no premarcado**, con fecha guardada (`consent_at`).
-- **Minimización:** no pedir teléfono, matrícula, edad ni carrera. No se necesitan.
-- El correo **nunca** se expone en ninguna respuesta pública, ni en el leaderboard,
-  ni en logs, ni en mensajes de error, ni en analytics.
+- **Minimización:** se piden nombre, **matrícula** y correo. Nada más: ni teléfono,
+  ni edad, ni carrera, ni ubicación.
+  - *Decisión del 2026-07-27:* la matrícula se agregó a petición de la
+    organización para poder identificar a los participantes del Tec. Es dato
+    personal y sube el impacto de una fuga, así que se trata con el mismo
+    cuidado que el correo: obligatoria al registrarse, guardada normalizada en
+    mayúsculas y **nunca** expuesta.
+- El correo **y la matrícula** nunca se exponen en ninguna respuesta pública, ni
+  en el leaderboard, ni en logs, ni en mensajes de error, ni en analytics.
 - Debe existir una forma de borrar a un jugador a petición (script administrativo
   basta) y una fecha de retención definida por la organización.
 

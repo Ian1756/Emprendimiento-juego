@@ -41,8 +41,22 @@ function nameSchema(min: number, max: number, label: string) {
     );
 }
 
+/**
+ * Matrícula del Tec: empieza con A0 seguido de dígitos (ej. A01234567).
+ * Se guarda normalizada en mayúsculas para que A0… y a0… no creen variantes.
+ */
+const MATRICULA = /^A0\d{5,9}$/;
+
+const matriculaSchema = z
+  .string()
+  .transform((value) => cleanText(value).toUpperCase().replace(/\s/g, ''))
+  .pipe(
+    z.string().regex(MATRICULA, 'Tu matrícula debe empezar con A0 (ejemplo: A01234567).'),
+  );
+
 export const registerSchema = z.object({
   name: nameSchema(GAME_RULES.PLAYER_NAME_MIN, GAME_RULES.PLAYER_NAME_MAX, 'Tu nombre'),
+  matricula: matriculaSchema,
   email: z
     .string()
     .transform((value) => value.trim().toLowerCase())

@@ -10,6 +10,8 @@ export interface Player {
   displayName: string;
   /** PRIVADO: nunca debe salir en una respuesta pública (§4.5). */
   email: string;
+  /** PRIVADO igual que el correo: identifica a la persona en el Tec (§4.5). */
+  matricula: string | null;
   consentAt: string;
   createdAt: string;
 }
@@ -55,7 +57,7 @@ export interface PlayerStanding {
 export interface Store {
   findPlayerByEmail(email: string): Promise<Player | null>;
   findPlayerById(id: string): Promise<Player | null>;
-  createPlayer(input: { displayName: string; email: string }): Promise<Player>;
+  createPlayer(input: { displayName: string; email: string; matricula: string }): Promise<Player>;
 
   createGameSession(input: { playerId: string; seed: number }): Promise<GameSession>;
   findGameSession(id: string): Promise<GameSession | null>;

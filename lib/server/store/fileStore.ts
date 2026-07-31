@@ -80,10 +80,17 @@ export const fileStore: Store = {
     return database.players.find((player) => player.id === id) ?? null;
   },
 
-  async createPlayer({ displayName, email }) {
+  async createPlayer({ displayName, email, matricula }) {
     const database = await load();
     const now = new Date().toISOString();
-    const player: Player = { id: randomUUID(), displayName, email, consentAt: now, createdAt: now };
+    const player: Player = {
+      id: randomUUID(),
+      displayName,
+      email,
+      matricula,
+      consentAt: now,
+      createdAt: now,
+    };
     database.players.push(player);
     await persist(database);
     return player;

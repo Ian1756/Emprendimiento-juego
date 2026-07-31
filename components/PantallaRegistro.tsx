@@ -15,6 +15,7 @@ interface Props {
 
 export default function PantallaRegistro({ onRegistered }: Props) {
   const [name, setName] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export default function PantallaRegistro({ onRegistered }: Props) {
       const response = await fetch('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, consent }),
+        body: JSON.stringify({ name, matricula, email, consent }),
       });
       const data = (await response.json()) as { playerName?: string; error?: string };
 
@@ -73,6 +74,21 @@ export default function PantallaRegistro({ onRegistered }: Props) {
           required
         />
 
+        <label className="mt-2 text-sm font-semibold" htmlFor="matricula">
+          Tu matrícula
+        </label>
+        <input
+          id="matricula"
+          className="campo uppercase"
+          value={matricula}
+          onChange={(event) => setMatricula(event.target.value)}
+          placeholder="A01234567"
+          maxLength={12}
+          autoCapitalize="characters"
+          autoComplete="off"
+          required
+        />
+
         <label className="mt-2 text-sm font-semibold" htmlFor="correo">
           Tu correo electrónico
         </label>
@@ -95,8 +111,8 @@ export default function PantallaRegistro({ onRegistered }: Props) {
             onChange={(event) => setConsent(event.target.checked)}
           />
           <span>
-            Acepto que {publicConfig.organization} use mi nombre y correo para contactarme sobre
-            emprendimiento.{' '}
+            Acepto que {publicConfig.organization} use mi nombre, matrícula y correo para
+            contactarme sobre emprendimiento.{' '}
             <a
               className="underline"
               href={publicConfig.privacyUrl}

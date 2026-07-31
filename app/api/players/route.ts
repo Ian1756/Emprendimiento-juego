@@ -28,12 +28,13 @@ export async function POST(request: Request) {
 
   try {
     const store = await getStore();
-    const { name, email } = parsed.data;
+    const { name, email, matricula } = parsed.data;
 
     // Si ya existe, se reutiliza: no se duplica el jugador y no se cambia el
     // nombre visible (conocer un correo ajeno no debe permitir renombrarlo).
     const existing = await store.findPlayerByEmail(email);
-    const player = existing ?? (await store.createPlayer({ displayName: name, email }));
+    const player =
+      existing ?? (await store.createPlayer({ displayName: name, email, matricula }));
 
     await setSessionCookie(player.id);
     return NextResponse.json({ ok: true, playerName: player.displayName });

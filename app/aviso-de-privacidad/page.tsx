@@ -19,9 +19,9 @@ export default function Page() {
           de tus datos personales.
         </p>
         <p>
-          <strong>Qué recabamos.</strong> Únicamente tu <strong>nombre</strong> y tu{' '}
-          <strong>correo electrónico</strong>, junto con los puntajes que obtienes en el juego. No
-          pedimos teléfono, matrícula, edad ni ubicación.
+          <strong>Qué recabamos.</strong> Tu <strong>nombre</strong>, tu{' '}
+          <strong>matrícula</strong> y tu <strong>correo electrónico</strong>, junto con los
+          puntajes que obtienes en el juego. No pedimos teléfono, edad, carrera ni ubicación.
         </p>
         <p>
           <strong>Para qué los usamos.</strong> Para mostrar tu nombre en la tabla de puntajes del
@@ -30,8 +30,8 @@ export default function Page() {
         </p>
         <p>
           <strong>Qué es público.</strong> Solo tu nombre, el nombre de tu empresa y tu puntaje, y
-          únicamente si quedas dentro del Top 5. <strong>Tu correo nunca se muestra</strong> ni se
-          comparte con terceros.
+          únicamente si quedas dentro del Top 5.{' '}
+          <strong>Tu correo y tu matrícula nunca se muestran</strong> ni se comparten con terceros.
         </p>
         <p>
           <strong>Derechos ARCO.</strong> Puedes solicitar el acceso, rectificación, cancelación u

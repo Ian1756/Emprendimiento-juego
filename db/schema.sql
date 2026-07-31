@@ -17,6 +17,10 @@ create table if not exists players (
 -- Un correo = un jugador, sin importar mayúsculas ni acentos de teclado.
 create unique index if not exists players_email_unico on players (lower(email));
 
+-- Matrícula del Tec (A0…). Nullable: los jugadores registrados antes de que se
+-- pidiera no la tienen. Es dato personal: no sale en ninguna respuesta pública.
+alter table players add column if not exists matricula text;
+
 create table if not exists game_sessions (
   id         uuid primary key default gen_random_uuid(),
   player_id  uuid not null references players(id) on delete cascade,
