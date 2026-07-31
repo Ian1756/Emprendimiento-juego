@@ -19,6 +19,8 @@
   --rapida: 140ms;
   --normal: 260ms;
   --lenta: 480ms;
+  /* Debe coincidir con SHAKE_MS en PantallaJuego.tsx. */
+  --sacudida: 340ms;
 
   /* --- Color --- */
   --fondo: #080d1c;
@@ -227,8 +229,13 @@ body {
 .tablero {
   display: grid;
   gap: 0.3rem;
-  touch-action: manipulation;
   user-select: none;
+}
+
+/* touch-action: none es lo que permite arrastrar hacia arriba y abajo sin que
+   el navegador interprete el gesto como scroll de la página. */
+.ficha {
+  touch-action: none;
 }
 
 .ficha {
@@ -312,16 +319,30 @@ body {
   }
 }
 
-/* Error: 3 oscilaciones cortas, sin rebote. Un error se siente firme. */
+/* Arrastre: la ficha sigue al dedo sin transición (manipulación directa) y se
+   levanta un poco sobre las demás. */
+.ficha-arrastrada {
+  transition: none;
+  z-index: 4;
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.28),
+    0 10px 22px -6px rgba(0, 0, 0, 0.65);
+}
+
+/* Error: 3 oscilaciones cortas, sin rebote. Un error se siente firme.
+   Las dos fichas del intento tambalean a la vez y vuelven a su sitio. */
 .ficha-invalida {
-  animation: sacude 320ms var(--suave);
+  animation: sacude var(--sacudida) var(--suave);
+  z-index: 4;
 }
 
 @keyframes sacude {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-5px); }
-  45% { transform: translateX(5px); }
-  70% { transform: translateX(-3px); }
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-6px) rotate(-2deg); }
+  35% { transform: translateX(6px) rotate(2deg); }
+  55% { transform: translateX(-4px) rotate(-1.5deg); }
+  75% { transform: translateX(3px) rotate(1deg); }
+  100% { transform: translateX(0) rotate(0); }
 }
 
 /* ---------- Marcador ---------- */

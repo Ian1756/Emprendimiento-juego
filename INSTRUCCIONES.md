@@ -83,6 +83,19 @@ Restricciones de diseño que se derivan de eso:
 - Mecánica: intercambiar dos fichas **adyacentes**; el movimiento solo es válido si
   produce una línea de **3 o más** del mismo color. Las fichas alineadas explotan,
   las de arriba caen y se rellena desde el techo.
+- **Dos formas de mover, ambas válidas:**
+  1. **Tocar** una ficha y luego una vecina.
+  2. **Arrastrar** una ficha hacia una vecina. Solo cuenta la dirección
+     dominante del gesto y solo vecinas ortogonales: nada de diagonales, saltos
+     ni soltar fuera del tablero. Mientras se arrastra, la ficha sigue al dedo
+     sin easing (manipulación directa) recortada a una celda, y la vecina se
+     aparta para adelantar el intercambio.
+  - Si el intercambio es imposible, todo vuelve a su sitio y **las dos** fichas
+    tambalean. *Cuidado al tocar esto:* el clic sintético que sigue a un
+    arrastre debe ignorarse, pero la bandera que lo ignora se limpia al
+    **empezar** el gesto siguiente, no al recibir el clic — si un arrastre
+    termina fuera de la ficha nunca llega ese clic y la bandera se quedaría
+    encendida, tragándose el siguiente toque (bug real del 2026-07-31).
 - **Cascadas**: los combos que se forman solos al caer también puntúan, con
   multiplicador creciente.
 - No hay estados perdedores; si el tablero se queda sin movimientos posibles, se
