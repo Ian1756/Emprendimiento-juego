@@ -423,7 +423,16 @@ No hace falta cobertura total, sí estos casos:
 ## 6. Accesibilidad y UX no negociables
 
 - Contraste suficiente y **forma/ícono además de color** en cada ficha: hay gente
-  daltónica y los cinco colores incluyen rojo y verde.
+  daltónica y los cinco colores incluyen rojo y verde. Los iconos son SVG
+  propios (`components/IconosJuego.tsx`), no emoji: el emoji cambia de dibujo
+  según el sistema operativo, no se puede colorear y se ve borroso proyectado.
+- **Identidad de movimiento** (arquetipo *Energetic*, ver `app/globals.css`):
+  una curva firma `--sale`, tres duraciones (`--rapida/--normal/--lenta`) y un
+  único patrón de entrada (`.entra`). Cualquier animación nueva usa esas
+  constantes; no se inventan curvas ni tiempos sueltos.
+- **La marca** (`components/LogoTec.tsx`) aparece en todas las pantallas, con
+  "TEC CEM" bajo el rayo. Se pinta con `mask-image` y `currentColor`, así que
+  funciona sobre fondo oscuro o claro con un solo archivo.
 - Objetivos táctiles ≥ 44×44 px.
 - Respetar `prefers-reduced-motion` (bajar animaciones de cascada).
 - El juego no depende de sonido. Si hay sonido, arranca apagado.

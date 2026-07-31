@@ -4,6 +4,7 @@
  * y el domicilio antes del evento.
  */
 import Link from 'next/link';
+import LogoTec from '@/components/LogoTec';
 import { publicConfig } from '@/lib/config';
 
 export const metadata = { title: 'Aviso de privacidad | Reto Emprendedor' };
@@ -11,6 +12,9 @@ export const metadata = { title: 'Aviso de privacidad | Reto Emprendedor' };
 export default function Page() {
   return (
     <main className="pantalla">
+      <div className="text-center">
+        <LogoTec />
+      </div>
       <h1 className="text-2xl font-extrabold">Aviso de privacidad</h1>
 
       <section className="tarjeta flex flex-col gap-3 text-sm leading-relaxed">

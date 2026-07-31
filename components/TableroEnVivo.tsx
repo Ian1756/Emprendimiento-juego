@@ -11,13 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LeaderboardResponse } from '@/lib/apiTypes';
 import type { LeaderboardEntry } from '@/lib/server/store/types';
 import { GAME_RULES } from '@/lib/game/rules';
+import LogoTec from './LogoTec';
 
 /** Cada cuánto se consulta el tablero. Más corto solo gastaría peticiones. */
 const REFRESCO_MS = 4_000;
 /** Cuánto dura el resaltado de una entrada nueva. */
 const DESTACADO_MS = 8_000;
-
-const MEDALLAS = ['🥇', '🥈', '🥉'];
 
 interface Props {
   entradasIniciales: LeaderboardEntry[];
@@ -74,12 +73,15 @@ export default function TableroEnVivo({ entradasIniciales }: Props) {
   return (
     <main className="tablero-vivo">
       <header className="tablero-vivo-encabezado">
-        <h1>🏆 Top {GAME_RULES.LEADERBOARD_SIZE}</h1>
-        <p>
-          {lider
-            ? `${lider.playerName} va al frente con ${lider.score.toLocaleString('es-MX')} puntos`
-            : 'Escanea el QR y sé la primera persona en el tablero'}
-        </p>
+        <div>
+          <h1>Top {GAME_RULES.LEADERBOARD_SIZE}</h1>
+          <p>
+            {lider
+              ? `${lider.playerName} va al frente con ${lider.score.toLocaleString('es-MX')} puntos`
+              : 'Escanea el QR y sé la primera persona en el tablero'}
+          </p>
+        </div>
+        <LogoTec />
       </header>
 
       {entradas.length === 0 ? (
@@ -93,8 +95,8 @@ export default function TableroEnVivo({ entradasIniciales }: Props) {
                 key={clave}
                 className={`tablero-vivo-fila${destacadas.has(clave) ? ' es-nueva' : ''}`}
               >
-                <span className="tablero-vivo-puesto">
-                  {MEDALLAS[entrada.rank - 1] ?? entrada.rank}
+                <span className={`tablero-vivo-puesto puesto puesto-${entrada.rank}`}>
+                  {entrada.rank}
                 </span>
                 <span className="tablero-vivo-datos">
                   <strong>{entrada.playerName}</strong>

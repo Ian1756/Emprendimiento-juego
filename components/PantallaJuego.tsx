@@ -7,14 +7,23 @@
  * `score` y `clearing` son la vista, que va un poco atrás por la animación.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { areAdjacent, EMPTY, type Board } from '@/lib/game/board';
+import { areAdjacent, colOf, EMPTY, type Board } from '@/lib/game/board';
 import { applyMove, createGame, type Move } from '@/lib/game/engine';
 import { GAME_RULES, TILE_COLORS } from '@/lib/game/rules';
+import { IconoIngrediente } from './IconosJuego';
+import LogoTec from './LogoTec';
 
-const SWAP_MS = 120;
-const CLEAR_MS = 170;
-const REFILL_MS = 130;
+/**
+ * Tiempos alineados con la identidad de movimiento (ver globals.css):
+ * el intercambio es feedback inmediato, la explosión tiene anticipación y la
+ * caída se escalona por columna.
+ */
+const SWAP_MS = 140;
+const CLEAR_MS = 190;
+const REFILL_MS = 260;
 const TICK_MS = 200;
+/** Debajo de esto el cronómetro se pone rojo y late. */
+const SEGUNDOS_CRITICOS = 10;
 
 export interface RunOutcome {
   score: number;
@@ -52,6 +61,8 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [clearing, setClearing] = useState<number[]>([]);
   const [invalidCell, setInvalidCell] = useState<number | null>(null);
+  /** Celdas recién rellenadas: se les aplica la animación de caída. */
+  const [cayendo, setCayendo] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(GAME_RULES.DURATION_SECONDS);
   const [gain, setGain] = useState<{ key: number; points: number } | null>(null);
@@ -78,6 +89,7 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
   }, [finish]);
 
   const clearingSet = useMemo(() => new Set(clearing), [clearing]);
+  const cayendoSet = useMemo(() => new Set(cayendo), [cayendo]);
 
   async function playMove(move: Move): Promise<void> {
     const result = applyMove(engineRef.current, move);
@@ -107,7 +119,11 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
       setGain({ key: step.cascadeIndex + movesRef.current.length * 100, points: step.gained });
       setClearing([]);
       setBoard(step.boardAfterRefill);
+      // Las celdas que se vaciaron son las que caen: darles la animación de
+      // entrada hace que el tablero se rellene en cascada y no de golpe.
+      setCayendo(step.clearedCells);
       if (!fast) await sleep(REFILL_MS);
+      setCayendo([]);
     }
 
     if (result.reshuffled) setBoard(engineRef.current.board);
@@ -132,22 +148,23 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
     void playMove(move);
   }
 
-  const timeIsLow = secondsLeft <= 10;
+  const tiempoCritico = secondsLeft <= SEGUNDOS_CRITICOS;
+  const porcentajeTiempo = (secondsLeft / GAME_RULES.DURATION_SECONDS) * 100;
 
   return (
     <main className="pantalla">
-      <header className="flex items-center justify-between">
+      <header className="marcador">
         <div>
-          <p className="text-xs uppercase tracking-wide text-[var(--texto-suave)]">Puntos</p>
-          <p className="text-3xl font-extrabold tabular-nums">{score.toLocaleString('es-MX')}</p>
+          <p className="titulo-seccion">Puntos</p>
+          <p className={`marcador-cifra${gain ? ' marcador-pulso' : ''}`} key={gain?.key ?? 'base'}>
+            {score.toLocaleString('es-MX')}
+          </p>
         </div>
         <div className="relative text-right">
-          <p className="text-xs uppercase tracking-wide text-[var(--texto-suave)]">Tiempo</p>
-          <p
-            className={`text-3xl font-extrabold tabular-nums ${timeIsLow ? 'text-[var(--pasion)]' : ''}`}
-            aria-live="off"
-          >
-            {secondsLeft}s
+          <p className="titulo-seccion">Tiempo</p>
+          <p className={`marcador-cifra${tiempoCritico ? ' tiempo-critico' : ''}`}>
+            {secondsLeft}
+            <span className="ml-0.5 text-base font-bold text-[var(--texto-suave)]">s</span>
           </p>
           {gain ? (
             <span key={gain.key} className="flotante">
@@ -157,8 +174,14 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
         </div>
       </header>
 
+      <div className={`barra-tiempo${tiempoCritico ? ' poco' : ''}`}>
+        <span style={{ width: `${porcentajeTiempo}%` }} />
+      </div>
+
+      {/* El tablero es el héroe de esta pantalla: se queda centrado en el
+          espacio disponible en vez de pegarse arriba. */}
       <div
-        className="tablero"
+        className="tablero my-auto"
         style={{ gridTemplateColumns: `repeat(${GAME_RULES.COLS}, minmax(0, 1fr))` }}
         role="grid"
         aria-label="Tablero del juego"
@@ -168,8 +191,10 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
           const classes = [
             'ficha',
             tile ? tile.className : 'tile-vacia',
+            tile ? `ficha-${tile.ink}` : '',
             selected === index ? 'ficha-seleccionada' : '',
             clearingSet.has(index) ? 'ficha-explotando' : '',
+            cayendoSet.has(index) ? 'ficha-cayendo' : '',
             invalidCell === index ? 'ficha-invalida' : '',
           ]
             .filter(Boolean)
@@ -182,19 +207,25 @@ export default function PantallaJuego({ seed, onFinish }: Props) {
               key={index}
               type="button"
               className={classes}
+              // El retraso por columna escalona la caída de izquierda a derecha.
+              style={{ '--col': colOf(index) } as React.CSSProperties}
               onClick={() => handleTap(index)}
               disabled={busy}
               aria-label={tile ? tile.label : 'vacío'}
             >
-              <span aria-hidden="true">{tile ? tile.icon : ''}</span>
+              {tile ? <IconoIngrediente colorIndex={color} /> : null}
             </button>
           );
         })}
       </div>
 
       <p className="text-center text-sm text-[var(--texto-suave)]">
-        Toca una ficha y luego una vecina para intercambiarlas. Junta 3 o más iguales.
+        Toca una ficha y luego una vecina. Junta 3 o más iguales.
       </p>
+
+      <div className="pie-marca !mt-2">
+        <LogoTec discreto />
+      </div>
     </main>
   );
 }

@@ -2,21 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================================
+   IDENTIDAD DE MOVIMIENTO — arquetipo "Energetic"
+   Un juego de 90 segundos en un evento tiene que sentirse rápido y decidido.
+   Tres constantes para todo el proyecto (skill motion-design):
+     1. Curva firma:  --sale (ease-out-expo) en el 80% de las animaciones
+     2. Paleta de duraciones: rápida / normal / lenta
+     3. Entrada única: subir 16px + aparecer, escalonado
+   =========================================================================== */
 :root {
-  --fondo: #0b1020;
-  --fondo-suave: #151c33;
-  --borde: #2a3355;
-  --texto: #f4f6ff;
-  --texto-suave: #a6afd0;
-  --acento: #4f7cff;
+  --sale: cubic-bezier(0.16, 1, 0.3, 1);
+  --entra: cubic-bezier(0.3, 0, 1, 1);
+  --rebote: cubic-bezier(0.175, 0.885, 0.32, 1.4);
+  --suave: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Los cinco colores del juego (§2.4). Cada ficha lleva además ícono para
-     que no dependa solo del color (accesibilidad, §6). */
+  --rapida: 140ms;
+  --normal: 260ms;
+  --lenta: 480ms;
+
+  /* --- Color --- */
+  --fondo: #080d1c;
+  --fondo-alto: #10172e;
+  --fondo-suave: #161f3d;
+  --borde: #27324f;
+  --borde-vivo: #3d4d78;
+  --texto: #f5f7ff;
+  --texto-suave: #97a3c6;
+  --acento: #4f7cff;
+  --acento-alto: #7aa0ff;
+  --oro: #ffce4d;
+
   --clientes: #3b82f6;
   --ideas: #f5b301;
   --recursos: #22c55e;
   --talento: #a855f7;
   --pasion: #ef4444;
+
+  --radio: 1rem;
+  --radio-chico: 0.75rem;
 }
 
 html,
@@ -29,145 +52,485 @@ body {
 
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Capa ambiente: dos halos fijos que le quitan lo plano al fondo. */
+  background-image:
+    radial-gradient(60rem 40rem at 15% -10%, rgba(79, 124, 255, 0.16), transparent 60%),
+    radial-gradient(45rem 35rem at 110% 10%, rgba(168, 85, 247, 0.12), transparent 60%);
+  background-attachment: fixed;
 }
 
 .pantalla {
   min-height: 100dvh;
   max-width: 30rem;
   margin: 0 auto;
-  padding: 1.25rem 1rem 2rem;
+  padding: 1.1rem 1rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
+/* ---------- Marca ---------- */
+.marca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--texto);
+}
+
+.marca-rayo {
+  display: block;
+  width: 1.9rem;
+  height: 2.55rem;
+  background-color: currentColor;
+  -webkit-mask: url('/rayo-tec.png') center / contain no-repeat;
+  mask: url('/rayo-tec.png') center / contain no-repeat;
+}
+
+.marca-grande .marca-rayo {
+  width: 2.9rem;
+  height: 3.9rem;
+}
+
+.marca-texto {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  line-height: 1;
+}
+
+.marca-grande .marca-texto {
+  font-size: 0.85rem;
+}
+
+.marca-discreta {
+  color: var(--texto-suave);
+  opacity: 0.75;
+}
+
+/* Pie de marca: separa la firma del contenido sin robar atención. */
+.pie-marca {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- Superficies ---------- */
 .tarjeta {
-  background: var(--fondo-suave);
+  background: linear-gradient(180deg, var(--fondo-suave), var(--fondo-alto));
   border: 1px solid var(--borde);
-  border-radius: 1rem;
+  border-radius: var(--radio);
   padding: 1rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
+.titulo-seccion {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+/* ---------- Botones ----------
+   Press: anticipación corta (140ms) y regreso con rebote (260ms). */
 .boton {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 3rem;
-  border-radius: 0.875rem;
-  font-weight: 700;
-  transition: transform 0.08s ease, opacity 0.15s ease;
+  min-height: 3.25rem;
+  border-radius: var(--radio-chico);
+  font-weight: 800;
+  transition:
+    transform var(--normal) var(--rebote),
+    box-shadow var(--rapida) var(--sale),
+    opacity var(--rapida) var(--sale);
 }
+
 .boton:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
+  transition-duration: var(--rapida);
+  transition-timing-function: var(--entra);
 }
+
 .boton:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 .boton-primario {
-  background: var(--acento);
+  background: linear-gradient(180deg, var(--acento-alto), var(--acento));
   color: #fff;
+  box-shadow: 0 6px 18px -6px rgba(79, 124, 255, 0.9);
 }
+
+.boton-primario:active {
+  box-shadow: 0 2px 8px -4px rgba(79, 124, 255, 0.9);
+}
+
 .boton-secundario {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--borde);
   color: var(--texto);
 }
+
 .boton-whatsapp {
-  background: #25d366;
+  background: linear-gradient(180deg, #34e07b, #21c665);
   color: #06301a;
+  box-shadow: 0 6px 18px -6px rgba(34, 197, 94, 0.8);
 }
 
 .campo {
   width: 100%;
-  min-height: 3rem;
-  border-radius: 0.875rem;
+  min-height: 3.1rem;
+  border-radius: var(--radio-chico);
   border: 1px solid var(--borde);
-  background: #0f1528;
+  background: rgba(0, 0, 0, 0.28);
   color: var(--texto);
-  padding: 0 0.875rem;
+  padding: 0 0.9rem;
   font-size: 1rem; /* 16px evita el zoom automático en iOS */
-}
-.campo:focus {
-  outline: 2px solid var(--acento);
-  outline-offset: 1px;
+  transition: border-color var(--rapida) var(--sale), box-shadow var(--rapida) var(--sale);
 }
 
-/* ---- Tablero ---- */
+.campo::placeholder {
+  color: #5f6d94;
+}
+
+.campo:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.25);
+}
+
+/* ===========================================================================
+   ENTRADAS — patrón único: sube 16px y aparece.
+   El escalonado va por variable --i para no repetir reglas por elemento.
+   =========================================================================== */
+.entra {
+  animation: sube-y-aparece var(--lenta) var(--sale) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes sube-y-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Tablero ---------- */
 .tablero {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.3rem;
   touch-action: manipulation;
   user-select: none;
 }
 
 .ficha {
+  position: relative;
   aspect-ratio: 1;
   min-width: 0;
-  border-radius: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(1rem, 5vw, 1.5rem);
-  line-height: 1;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25);
-  transition: transform 0.12s ease, opacity 0.12s ease;
+  border-radius: 0.72rem;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.28),
+    inset 0 2px 0 rgba(255, 255, 255, 0.18);
+  /* La ficha se mueve con la curva firma; el brillo la sigue 60ms después
+     (follow-through: la sombra nunca llega junto con el objeto). */
+  transition:
+    transform var(--normal) var(--sale),
+    opacity var(--rapida) var(--entra),
+    box-shadow var(--normal) var(--sale) 60ms;
 }
 
-.tile-clientes { background: var(--clientes); }
-.tile-ideas { background: var(--ideas); }
-.tile-recursos { background: var(--recursos); }
-.tile-talento { background: var(--talento); }
-.tile-pasion { background: var(--pasion); }
-.tile-vacia { background: transparent; box-shadow: none; }
+.ficha svg {
+  width: 58%;
+  height: 58%;
+}
 
+.ficha-clara svg {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.ficha-oscura svg {
+  color: rgba(10, 16, 34, 0.78);
+}
+
+.tile-clientes { background: linear-gradient(165deg, #5b9bff, var(--clientes)); }
+.tile-ideas { background: linear-gradient(165deg, #ffd251, var(--ideas)); }
+.tile-recursos { background: linear-gradient(165deg, #4ade80, var(--recursos)); }
+.tile-talento { background: linear-gradient(165deg, #c084fc, var(--talento)); }
+.tile-pasion { background: linear-gradient(165deg, #f87171, var(--pasion)); }
+
+.tile-vacia {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+/* Selección: la ficha se agacha y respira. Anticipación antes del movimiento. */
 .ficha-seleccionada {
-  outline: 3px solid #fff;
-  outline-offset: -3px;
-  transform: scale(0.92);
+  transform: scale(0.88);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.95),
+    0 0 22px rgba(255, 255, 255, 0.35);
+  z-index: 2;
 }
 
+/* Explosión: crece un pelo (anticipación) y colapsa. */
 .ficha-explotando {
-  transform: scale(0.25);
-  opacity: 0;
+  animation: revienta 190ms var(--entra) both;
+  z-index: 3;
 }
 
+@keyframes revienta {
+  0% { transform: scale(1); }
+  28% { transform: scale(1.14); }
+  100% { transform: scale(0.2); opacity: 0; }
+}
+
+/* Relleno: la ficha nueva cae desde arriba con un escalonado por columna,
+   así el tablero se rellena en cascada y no de golpe. */
+.ficha-cayendo {
+  animation: cae var(--normal) var(--sale) both;
+  animation-delay: calc(var(--col, 0) * 22ms);
+}
+
+@keyframes cae {
+  from {
+    transform: translateY(-140%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Error: 3 oscilaciones cortas, sin rebote. Un error se siente firme. */
 .ficha-invalida {
-  animation: sacudir 0.25s ease;
+  animation: sacude 320ms var(--suave);
 }
 
-@keyframes sacudir {
+@keyframes sacude {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  20% { transform: translateX(-5px); }
+  45% { transform: translateX(5px); }
+  70% { transform: translateX(-3px); }
+}
+
+/* ---------- Marcador ---------- */
+.marcador {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.marcador-cifra {
+  font-size: 2.1rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.marcador-pulso {
+  animation: late var(--normal) var(--rebote);
+}
+
+@keyframes late {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.16); }
+  100% { transform: scale(1); }
 }
 
 .flotante {
   position: absolute;
-  right: 0.75rem;
-  top: 0;
-  font-weight: 800;
-  color: #ffd766;
-  animation: subir 0.7s ease forwards;
+  right: 0;
+  top: -0.2rem;
+  font-weight: 900;
+  color: var(--oro);
+  animation: sube-y-desvanece 800ms var(--sale) forwards;
   pointer-events: none;
+  text-shadow: 0 2px 12px rgba(255, 206, 77, 0.5);
 }
 
-@keyframes subir {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-1.75rem); }
+@keyframes sube-y-desvanece {
+  0% { opacity: 0; transform: translateY(6px) scale(0.9); }
+  25% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-2.2rem) scale(1); }
 }
 
-/* ---- Tablero en vivo (proyección en pantalla grande) ---- */
+/* Barra de tiempo: única animación lineal justificada (progreso). */
+.barra-tiempo {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.barra-tiempo span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--acento-alto), var(--acento));
+  transition: width 1s linear, background var(--normal) var(--sale);
+}
+
+.barra-tiempo.poco span {
+  background: linear-gradient(90deg, #ff8f6b, var(--pasion));
+}
+
+.tiempo-critico {
+  color: var(--pasion);
+  animation: urgencia 1s var(--suave) infinite;
+}
+
+@keyframes urgencia {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ---------- Resultado ----------
+   Revelación teatral: el emblema entra, el título después, los datos al final.
+   Es el momento emotivo del juego, así que aquí sí se usa duración larga. */
+.emblema {
+  width: 5.5rem;
+  height: 5.5rem;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  animation: emblema-entra 620ms var(--rebote) both;
+  position: relative;
+}
+
+.emblema svg {
+  width: 55%;
+  height: 55%;
+  color: #fff;
+}
+
+.emblema::after {
+  content: '';
+  position: absolute;
+  inset: -0.6rem;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: onda 1.4s var(--sale) 320ms;
+}
+
+@keyframes emblema-entra {
+  0% { opacity: 0; transform: scale(0.4) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes onda {
+  0% { opacity: 0.65; transform: scale(0.85); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+.emblema-clientes { background: linear-gradient(160deg, #5b9bff, var(--clientes)); color: var(--clientes); }
+.emblema-ideas { background: linear-gradient(160deg, #ffd251, var(--ideas)); color: var(--ideas); }
+.emblema-recursos { background: linear-gradient(160deg, #4ade80, var(--recursos)); color: var(--recursos); }
+.emblema-talento { background: linear-gradient(160deg, #c084fc, var(--talento)); color: var(--talento); }
+.emblema-pasion { background: linear-gradient(160deg, #f87171, var(--pasion)); color: var(--pasion); }
+
+.puntaje-final {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Unicornio: el único lugar con brillo animado, para que se sienta raro. */
+.es-unicornio {
+  background: linear-gradient(100deg, #c084fc, #7aa0ff, #ffce4d, #c084fc);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: destella 3.5s var(--suave) infinite;
+}
+
+@keyframes destella {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Barras del desglose: crecen desde cero, escalonadas.
+   display:block es obligatorio — un <span> inline ignora height y transform. */
+.barra-color {
+  display: block;
+  height: 0.5rem;
+  border-radius: 999px;
+  transform-origin: left center;
+  animation: crece-barra var(--lenta) var(--sale) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 260ms);
+}
+
+@keyframes crece-barra {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.barra-clientes { background: var(--clientes); }
+.barra-ideas { background: var(--ideas); }
+.barra-recursos { background: var(--recursos); }
+.barra-talento { background: var(--talento); }
+.barra-pasion { background: var(--pasion); }
+
+/* ---------- Leaderboard ---------- */
+.fila-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem;
+  border-radius: var(--radio-chico);
+  transition: background var(--normal) var(--sale);
+}
+
+.fila-top-1 {
+  background: linear-gradient(90deg, rgba(255, 206, 77, 0.16), transparent);
+}
+
+.puesto {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+
+.puesto-1 { background: linear-gradient(160deg, #ffe08a, var(--oro)); color: #4a3200; }
+.puesto-2 { background: linear-gradient(160deg, #e8eefc, #b9c6de); color: #2b3346; }
+.puesto-3 { background: linear-gradient(160deg, #e6a56b, #c07c42); color: #3a2109; }
+
+/* ---------- Tablero en vivo (proyección) ---------- */
 .tablero-vivo {
   min-height: 100dvh;
   padding: 3vh 4vw;
   display: flex;
   flex-direction: column;
   gap: 2vh;
-  /* Todo escala con el alto de la pantalla: se ve igual en un monitor
-     que en un proyector. */
   font-size: clamp(1rem, 2.2vh, 2rem);
+}
+
+.tablero-vivo-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
 }
 
 .tablero-vivo-encabezado h1 {
@@ -182,42 +545,55 @@ body {
   font-size: clamp(1rem, 2.6vh, 2rem);
 }
 
+.tablero-vivo .marca-rayo {
+  width: clamp(2rem, 5vh, 4rem);
+  height: clamp(2.7rem, 6.7vh, 5.4rem);
+}
+
+.tablero-vivo .marca-texto {
+  font-size: clamp(0.7rem, 1.6vh, 1.2rem);
+}
+
 .tablero-vivo-lista {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.5vh;
+  gap: 1.4vh;
 }
 
 .tablero-vivo-fila {
   display: flex;
   align-items: center;
   gap: 2vw;
-  padding: 1.6vh 2vw;
+  padding: 1.5vh 2vw;
   border-radius: 1rem;
   background: var(--fondo-suave);
   border: 2px solid var(--borde);
-  transition: background 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
+  transition:
+    background var(--lenta) var(--sale),
+    border-color var(--lenta) var(--sale),
+    transform var(--lenta) var(--sale);
 }
 
+/* Quien acaba de entrar: entra desde la derecha y pulsa una vez. */
 .tablero-vivo-fila.es-nueva {
   border-color: var(--acento);
-  background: #1c2a5c;
-  animation: entrada-nueva 0.6s ease;
+  background: linear-gradient(90deg, #1d2b5e, var(--fondo-suave));
+  animation: llega-nuevo 700ms var(--rebote) both;
 }
 
-@keyframes entrada-nueva {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+@keyframes llega-nuevo {
+  0% { opacity: 0; transform: translateX(40px) scale(0.98); }
+  60% { transform: translateX(0) scale(1.02); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 .tablero-vivo-puesto {
-  width: 2.5em;
-  text-align: center;
-  font-size: clamp(1.5rem, 5vh, 3.5rem);
-  font-weight: 900;
+  width: clamp(2.4rem, 6.5vh, 5rem);
+  height: clamp(2.4rem, 6.5vh, 5rem);
+  flex-shrink: 0;
+  font-size: clamp(1.1rem, 3.4vh, 2.4rem);
 }
 
 .tablero-vivo-datos {
@@ -271,31 +647,28 @@ body {
   height: 0.8em;
   border-radius: 999px;
   background: #22c55e;
-  animation: latido 2s ease-in-out infinite;
+  animation: late-suave 2s var(--suave) infinite;
 }
 
 .tablero-vivo-pulso.sin-conexion {
   background: var(--ideas);
 }
 
-@keyframes latido {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+@keyframes late-suave {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.85); }
 }
 
+/* ===========================================================================
+   Accesibilidad: quien pide menos movimiento conserva los cambios de estado
+   (opacidad y color) pero pierde desplazamientos y rebotes.
+   =========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .tablero-vivo-pulso,
-  .tablero-vivo-fila.es-nueva {
-    animation: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ficha,
-  .boton,
-  .flotante,
-  .ficha-invalida {
-    animation: none !important;
-    transition: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

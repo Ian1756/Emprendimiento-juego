@@ -61,6 +61,9 @@ export const COMPANY_SIZE_ARTICLE: Record<CompanySize, string> = {
 /**
  * Los cinco colores. El ORDEN de este arreglo es el índice de color usado por el
  * motor y es también el criterio final de desempate del rubro (§2.4).
+ *
+ * `ink` es el color del icono sobre la ficha: oscuro sobre los tonos claros
+ * (ideas, recursos) y claro sobre los oscuros, para que siempre contraste.
  */
 export const TILE_COLORS = [
   {
@@ -68,40 +71,40 @@ export const TILE_COLORS = [
     label: 'Clientes',
     company: 'Empresa Comercial / Retail',
     description: 'Sabes a quién le sirve lo que haces y cómo llegar a esa gente.',
-    icon: '👥',
     className: 'tile-clientes',
+    ink: 'clara',
   },
   {
     id: 'ideas',
     label: 'Ideas',
     company: 'Empresa de Tecnología e Innovación',
     description: 'Conviertes problemas en soluciones que nadie había armado así.',
-    icon: '💡',
     className: 'tile-ideas',
+    ink: 'oscura',
   },
   {
     id: 'recursos',
     label: 'Recursos',
     company: 'Empresa Sustentable',
     description: 'Haces mucho con poco y cuidas de dónde sale cada insumo.',
-    icon: '🌱',
     className: 'tile-recursos',
+    ink: 'oscura',
   },
   {
     id: 'talento',
     label: 'Talento',
     company: 'Empresa Educativa / Consultoría',
     description: 'Tu fuerte es la gente: formarla, coordinarla y potenciarla.',
-    icon: '🎓',
     className: 'tile-talento',
+    ink: 'clara',
   },
   {
     id: 'pasion',
     label: 'Pasión',
     company: 'Empresa Social / Comunitaria',
     description: 'Emprendes por una causa y arrastras a otros contigo.',
-    icon: '❤️',
     className: 'tile-pasion',
+    ink: 'clara',
   },
 ] as const;
 

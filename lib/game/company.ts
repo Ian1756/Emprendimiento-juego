@@ -21,7 +21,6 @@ export interface CompanyResult {
   colorLabel: string;
   type: string;
   description: string;
-  icon: string;
 }
 
 export function companyFor(score: number, colorCounts: ColorCounts): CompanyResult {
@@ -37,6 +36,5 @@ export function companyFor(score: number, colorCounts: ColorCounts): CompanyResu
     colorLabel: color.label,
     type: color.company,
     description: color.description,
-    icon: color.icon,
   };
 }
