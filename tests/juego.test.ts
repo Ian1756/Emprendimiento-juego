@@ -257,6 +257,29 @@ test('detecta groserías disfrazadas con acentos, números o repeticiones', () =
 });
 
 /**
+ * Los números sueltos no se decodifican: "455" no es "ass" ni "717" es "tit".
+ * Falso positivo real: "Asistente 455" quedaba bloqueado.
+ */
+test('no bloquea nombres con números', () => {
+  const conNumeros = [
+    'Asistente 455',
+    'Grupo 717',
+    'Startup 360',
+    'Equipo 55',
+    'Innovación 2030',
+    'A1 Consultores',
+  ];
+
+  for (const texto of conNumeros) {
+    assert.equal(nombreAceptado(texto), true, `deberia aceptar: ${texto}`);
+  }
+
+  // Pero mezclar números DENTRO de una palabra sigue siendo disfraz.
+  assert.equal(nombreAceptado('put0'), false);
+  assert.equal(nombreAceptado('pu70'), false);
+});
+
+/**
  * La prueba que más importa: el filtro no puede dejar fuera a gente con nombre
  * legítimo. Por eso la comparación es por palabra completa y no por subcadena.
  */

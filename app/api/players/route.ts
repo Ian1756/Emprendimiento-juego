@@ -14,11 +14,13 @@ import { firstIssueMessage, registerSchema } from '@/lib/server/validation';
  *
  * En un evento presencial TODA la sala sale por la misma IP pública del WiFi
  * del campus. Un límite bajo aquí no frena a un atacante (le basta cambiar de
- * red) pero sí deja fuera a la fila entera de asistentes: con 5/hora, la sexta
- * persona en registrarse ya no podía jugar. Lo que de verdad acota el abuso es
- * el tope de 2 partidas por jugador, que va por cuenta y no por IP.
+ * red) pero sí deja fuera a la fila entera de asistentes: con 5/hora la sexta
+ * persona ya no podía jugar, y con 400/hora se quedaban fuera 600 de 1000
+ * (medido). Este número es un freno contra inundación, no una defensa: lo que
+ * de verdad acota el abuso es el tope de 2 partidas por jugador, que va por
+ * cuenta y no por IP.
  */
-const LIMIT_PER_HOUR = 400;
+const LIMIT_PER_HOUR = 2_000;
 const ONE_HOUR_SECONDS = 60 * 60;
 
 export async function POST(request: Request) {

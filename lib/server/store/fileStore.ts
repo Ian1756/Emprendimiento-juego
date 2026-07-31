@@ -16,42 +16,71 @@ interface Database {
   scores: ScoreRecord[];
 }
 
-const EMPTY_DATABASE: Database = { players: [], sessions: [], scores: [] };
+/**
+ * El estado vive en globalThis a propósito.
+ *
+ * `next dev` puede cargar este módulo varias veces (una por ruta). Con estado
+ * a nivel de módulo, cada ruta tenía su propia copia de la base y su propia
+ * cola de escritura: /api/scores no veía las sesiones que acababa de crear
+ * /api/sessions, y las escrituras concurrentes se pisaban entre sí. Compartir
+ * una sola copia y una sola cola lo vuelve consistente dentro del proceso.
+ *
+ * Esto NO lo hace apto para varios procesos: para eso está Postgres, que en
+ * producción es obligatorio (ver store/index.ts).
+ */
+interface EstadoCompartido {
+  cache: Database | null;
+  cola: Promise<unknown>;
+}
 
-let cache: Database | null = null;
-let pendingWrite: Promise<void> = Promise.resolve();
+const globalConEstado = globalThis as typeof globalThis & {
+  __almacenArchivo?: EstadoCompartido;
+};
+
+const estado: EstadoCompartido = (globalConEstado.__almacenArchivo ??= {
+  cache: null,
+  cola: Promise.resolve(),
+});
+
+/**
+ * Encola una operación: leer, modificar y escribir ocurren sin que otra
+ * petición se cuele en medio. Sin esto se pierden actualizaciones, porque dos
+ * peticiones leerían la misma versión y la segunda sobrescribiría a la primera.
+ */
+function enFila<T>(operacion: () => Promise<T>): Promise<T> {
+  const resultado = estado.cola.then(operacion, operacion);
+  estado.cola = resultado.catch(() => undefined);
+  return resultado;
+}
 
 function filePath(): string {
   return resolve(process.cwd(), serverEnv.dataFile);
 }
 
+/** Carga la base la primera vez; después se reutiliza la copia compartida. */
 async function load(): Promise<Database> {
-  if (cache) return cache;
+  if (estado.cache) return estado.cache;
 
   try {
     const raw = await readFile(filePath(), 'utf8');
     const parsed = JSON.parse(raw) as Partial<Database>;
-    cache = {
+    estado.cache = {
       players: parsed.players ?? [],
       sessions: parsed.sessions ?? [],
       scores: parsed.scores ?? [],
     };
   } catch {
     // Primer arranque: todavía no existe el archivo.
-    cache = { ...EMPTY_DATABASE };
+    estado.cache = { players: [], sessions: [], scores: [] };
   }
 
-  return cache;
+  return estado.cache;
 }
 
-/** Las escrituras se encadenan para que dos peticiones no se pisen el archivo. */
 async function persist(database: Database): Promise<void> {
-  pendingWrite = pendingWrite.then(async () => {
-    const path = filePath();
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, JSON.stringify(database, null, 2), 'utf8');
-  });
-  await pendingWrite;
+  const path = filePath();
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, JSON.stringify(database, null, 2), 'utf8');
 }
 
 function bestScorePerPlayer(scores: ScoreRecord[]): ScoreRecord[] {
@@ -80,35 +109,39 @@ export const fileStore: Store = {
     return database.players.find((player) => player.id === id) ?? null;
   },
 
-  async createPlayer({ displayName, email, matricula }) {
-    const database = await load();
-    const now = new Date().toISOString();
-    const player: Player = {
-      id: randomUUID(),
-      displayName,
-      email,
-      matricula,
-      consentAt: now,
-      createdAt: now,
-    };
-    database.players.push(player);
-    await persist(database);
-    return player;
+  createPlayer({ displayName, email, matricula }) {
+    return enFila(async () => {
+      const database = await load();
+      const now = new Date().toISOString();
+      const player: Player = {
+        id: randomUUID(),
+        displayName,
+        email,
+        matricula,
+        consentAt: now,
+        createdAt: now,
+      };
+      database.players.push(player);
+      await persist(database);
+      return player;
+    });
   },
 
-  async createGameSession({ playerId, seed }) {
-    const database = await load();
-    const session: GameSession = {
-      id: randomUUID(),
-      playerId,
-      seed,
-      startedAt: new Date().toISOString(),
-      endedAt: null,
-      status: 'open',
-    };
-    database.sessions.push(session);
-    await persist(database);
-    return session;
+  createGameSession({ playerId, seed }) {
+    return enFila(async () => {
+      const database = await load();
+      const session: GameSession = {
+        id: randomUUID(),
+        playerId,
+        seed,
+        startedAt: new Date().toISOString(),
+        endedAt: null,
+        status: 'open',
+      };
+      database.sessions.push(session);
+      await persist(database);
+      return session;
+    });
   },
 
   async countGameSessions(playerId) {
@@ -121,21 +154,29 @@ export const fileStore: Store = {
     return database.sessions.find((session) => session.id === id) ?? null;
   },
 
-  async closeGameSession(id, status: Exclude<SessionStatus, 'open'>) {
-    const database = await load();
-    const session = database.sessions.find((item) => item.id === id);
-    if (!session) return;
-    session.status = status;
-    session.endedAt = new Date().toISOString();
-    await persist(database);
+  closeGameSession(id, status: Exclude<SessionStatus, 'open'>) {
+    return enFila(async () => {
+      const database = await load();
+      const session = database.sessions.find((item) => item.id === id);
+      if (!session) return;
+      session.status = status;
+      session.endedAt = new Date().toISOString();
+      await persist(database);
+    });
   },
 
-  async saveScore(input) {
-    const database = await load();
-    const record: ScoreRecord = { ...input, id: randomUUID(), createdAt: new Date().toISOString() };
-    database.scores.push(record);
-    await persist(database);
-    return record;
+  saveScore(input) {
+    return enFila(async () => {
+      const database = await load();
+      const record: ScoreRecord = {
+        ...input,
+        id: randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+      database.scores.push(record);
+      await persist(database);
+      return record;
+    });
   },
 
   async topScores(limit) {

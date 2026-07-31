@@ -13,7 +13,7 @@ import { getStore } from '@/lib/server/store';
  * consulta al entrar y al terminar. Es una lectura pública sin datos
  * personales, así que el riesgo de un límite generoso es bajo.
  */
-const LIMIT_PER_MINUTE = 600;
+const LIMIT_PER_MINUTE = 1_200;
 const ONE_MINUTE_SECONDS = 60;
 
 export async function GET(request: Request) {

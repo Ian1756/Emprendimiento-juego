@@ -50,7 +50,13 @@ export async function POST(request: Request) {
     const session = await store.findGameSession(sessionId);
 
     // La sesión debe existir, ser de este jugador y no haberse usado antes.
-    if (!session || session.playerId !== playerId) return jsonError(REJECTED_MESSAGE, 403);
+    if (!session || session.playerId !== playerId) {
+      logServerError(
+        'scores.POST.rechazo',
+        new Error(session ? 'la sesion es de otro jugador' : 'sesion inexistente'),
+      );
+      return jsonError(REJECTED_MESSAGE, 403);
+    }
     if (session.status !== 'open') return jsonError('Esta partida ya se guardó.', 409);
 
     // Sin límite de tiempo para enviar: la persona nombra su empresa con

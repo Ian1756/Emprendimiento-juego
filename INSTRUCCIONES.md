@@ -229,7 +229,13 @@ estado y metería latencia); la única ruta real es `/`.
 
 **Persistencia:** la app habla con la interfaz `Store`. Si hay `DATABASE_URL` usa
 Postgres; si no, un archivo JSON local (`.data/db.json`), suficiente para
-desarrollo. **En producción `DATABASE_URL` es obligatoria**: el almacén en
+desarrollo. **El almacén en archivo solo sirve dentro de un proceso**: comparte
+una copia de la base y una cola de operaciones en `globalThis` para que
+leer-modificar-escribir sea atómico. Sin eso, `next dev` cargaba el módulo una
+vez por ruta y `/api/scores` no veía las sesiones de `/api/sessions` (bug real
+del 2026-07-31: 49 de 50 puntajes rechazados bajo carga). Además reescribe el
+archivo completo en cada operación, así que su latencia crece con el número de
+jugadores: no sirve para medir capacidad. **En producción `DATABASE_URL` es obligatoria**: el almacén en
 archivo no funciona en un hosting serverless (sistema de archivos de solo
 lectura y una instancia distinta por petición), así que `getStore()` falla
 con un mensaje explícito en vez de dar un 500 sin explicación. El archivo contiene
@@ -396,6 +402,9 @@ aproximado). No hay endpoint que diga "¿existe este correo?".
   - Se normaliza para detectar disfraces: acentos, mayúsculas, leet (`put0`,
     `pu70`), letras repetidas (`puuuto`), camelCase (`PutoElQueLoLea`) y
     letra por letra (`p u t o`).
+  - **Un token puramente numérico nunca se decodifica**: `455` no es `ass` ni
+    `717` es `tit`. Sin esa excepción quedaban bloqueados nombres normales como
+    "Asistente 455" o "Grupo 360" (falso positivo real del 2026-07-31).
   - Hay pruebas de las dos direcciones: que rechace groserías y que **no**
     rechace nombres legítimos. Al tocar la lista, corre `npm test`.
 - **Nunca** `dangerouslySetInnerHTML` con nombres de jugador o de empresa. React

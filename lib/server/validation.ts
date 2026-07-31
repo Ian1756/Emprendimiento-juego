@@ -32,25 +32,34 @@ const LEET: Record<string, string> = {
   '!': 'i',
 };
 
-/**
- * Minúsculas, sin acentos, sin leet y sin letras repetidas de adorno
- * ("puuuuto" → "puto"). Deja los espacios para poder buscar frases.
- */
-function normalizarParaFiltro(value: string): string {
+/** Minúsculas y sin acentos. No toca los números todavía. */
+function sinAcentos(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[01345789@$!]/g, (c) => LEET[c] ?? c)
-    .replace(/(.)\1{2,}/g, '$1');
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
+}
+
+/**
+ * Un token puramente numérico NUNCA se decodifica.
+ *
+ * Si no, "455" se convertía en "ass" y "717" en "tit", y quedaban bloqueados
+ * nombres perfectamente normales como "Asistente 455" o "Grupo 717" (falso
+ * positivo real, encontrado en pruebas el 2026-07-31). El leet solo tiene
+ * sentido cuando alguien mezcla números con letras para disfrazar una palabra.
+ */
+function decodificarToken(token: string): string {
+  if (/^[\d@$!]+$/.test(token)) return token;
+  return token.replace(/[01345789@$!]/g, (c) => LEET[c] ?? c).replace(/(.)\1{2,}/g, '$1');
 }
 
 /** Separa también camelCase: "PutoElQueLoLea" no debe pasar por ir pegado. */
 function tokenizar(value: string): string[] {
   const separado = value.replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2');
-  return normalizarParaFiltro(separado)
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
+  return sinAcentos(separado)
+    .split(/[^a-z0-9@$!]+/)
+    .filter(Boolean)
+    .map(decodificarToken);
 }
 
 /** Quita el plural simple para que "putos" caiga con "puto" en la lista. */
@@ -73,7 +82,7 @@ function hasBannedContent(value: string): boolean {
   const tokens = tokenizar(value);
   if (tokens.some(esProhibida)) return true;
 
-  const normalizado = normalizarParaFiltro(value.replace(/[^\p{L}\p{N}]+/gu, ' ')).trim();
+  const normalizado = tokens.join(' ');
   if ([...FRASES_PROHIBIDAS].some((frase) => normalizado.includes(frase))) return true;
 
   // Evasión letra por letra: "p u t o", "p.u.t.o". Solo se aplica cuando el
