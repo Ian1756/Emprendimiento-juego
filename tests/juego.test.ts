@@ -18,6 +18,7 @@ import {
 } from '../lib/game/board';
 import { applyMove, createGame, replayGame, type Move } from '../lib/game/engine';
 import { companyFor } from '../lib/game/company';
+import { intentosDe, mensajeDeIntentos } from '../lib/game/intentos';
 import { Rng } from '../lib/game/rng';
 import { GAME_RULES, TILE_COUNT, dominantColorIndex } from '../lib/game/rules';
 import { cellsClearedByRuns, pointsForRuns } from '../lib/game/scoring';
@@ -288,6 +289,26 @@ test('no bloquea nombres ni palabras legítimas', () => {
   for (const texto of legitimos) {
     assert.equal(nombreAceptado(texto), true, `deberia aceptar: ${texto}`);
   }
+});
+
+test('los intentos se agotan a las dos partidas', () => {
+  assert.equal(GAME_RULES.MAX_INTENTOS, 2);
+
+  const sinJugar = intentosDe(0);
+  assert.deepEqual(sinJugar, { usados: 0, restantes: 2, maximo: 2 });
+
+  const trasLaPrimera = intentosDe(1);
+  assert.equal(trasLaPrimera.restantes, 1);
+  assert.match(mensajeDeIntentos(trasLaPrimera), /una oportunidad más/i);
+  assert.match(mensajeDeIntentos(trasLaPrimera), /más alto/i);
+
+  const trasLaSegunda = intentosDe(2);
+  assert.equal(trasLaSegunda.restantes, 0);
+  assert.match(mensajeDeIntentos(trasLaSegunda), /última partida/i);
+
+  // Nunca puede quedar en negativo aunque el conteo venga inflado.
+  assert.equal(intentosDe(9).restantes, 0);
+  assert.equal(intentosDe(-3).usados, 0);
 });
 
 test('el mismo filtro aplica al nombre de la empresa', () => {

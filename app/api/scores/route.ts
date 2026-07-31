@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { companyFor } from '@/lib/game/company';
 import { replayGame } from '@/lib/game/engine';
+import { intentosDe } from '@/lib/game/intentos';
 import { GAME_RULES } from '@/lib/game/rules';
 import {
   GENERIC_ERROR_MESSAGE,
@@ -73,9 +74,10 @@ export async function POST(request: Request) {
     });
     await store.closeGameSession(session.id, 'closed');
 
-    const [leaderboard, standing] = await Promise.all([
+    const [leaderboard, standing, usados] = await Promise.all([
       store.topScores(GAME_RULES.LEADERBOARD_SIZE),
       store.standingFor(playerId),
+      store.countGameSessions(playerId),
     ]);
 
     return NextResponse.json({
@@ -84,6 +86,7 @@ export async function POST(request: Request) {
       company,
       leaderboard,
       standing,
+      intentos: intentosDe(usados),
       madeTopFive: (standing?.rank ?? Number.MAX_SAFE_INTEGER) <= GAME_RULES.LEADERBOARD_SIZE,
     });
   } catch (error) {

@@ -2,6 +2,7 @@
 
 /** Pantalla de inicio — INSTRUCCIONES.md §2.2. */
 import type { CSSProperties } from 'react';
+import { mensajeDeIntentos, type Intentos } from '@/lib/game/intentos';
 import { GAME_RULES, TILE_COLORS } from '@/lib/game/rules';
 import type { LeaderboardEntry, PlayerStanding } from '@/lib/server/store/types';
 import { BotonComunidad, BotonCompartir } from './BotonesComunidad';
@@ -13,6 +14,7 @@ interface Props {
   playerName: string;
   entries: LeaderboardEntry[];
   standing: PlayerStanding | null;
+  intentos: Intentos;
   starting: boolean;
   error: string | null;
   onPlay: () => void;
@@ -25,17 +27,22 @@ export default function PantallaInicio({
   playerName,
   entries,
   standing,
+  intentos,
   starting,
   error,
   onPlay,
 }: Props) {
+  const sinIntentos = intentos.restantes === 0;
+
   return (
     <main className="pantalla">
       <header className="entra text-center" style={orden(0)}>
         <LogoTec />
         <h1 className="mt-3 text-2xl font-extrabold">Hola, {playerName}</h1>
         <p className="text-sm text-[var(--texto-suave)]">
-          Tienes {GAME_RULES.DURATION_SECONDS} segundos para construir tu empresa.
+          {intentos.usados === 0
+            ? `Tienes ${GAME_RULES.DURATION_SECONDS} segundos para construir tu empresa.`
+            : mensajeDeIntentos(intentos)}
         </p>
       </header>
 
@@ -65,14 +72,23 @@ export default function PantallaInicio({
       ) : null}
 
       <div className="entra mt-auto flex flex-col gap-2 pt-2" style={orden(3)}>
-        <button
-          className="boton boton-primario text-lg"
-          type="button"
-          onClick={onPlay}
-          disabled={starting}
-        >
-          {starting ? 'Preparando…' : 'Jugar'}
-        </button>
+        {sinIntentos ? (
+          <p className="tarjeta text-center text-sm font-semibold">
+            Ya usaste tus {intentos.maximo} partidas.
+            <span className="mt-1 block font-normal text-[var(--texto-suave)]">
+              Comparte el juego y conecta con la comunidad.
+            </span>
+          </p>
+        ) : (
+          <button
+            className="boton boton-primario text-lg"
+            type="button"
+            onClick={onPlay}
+            disabled={starting}
+          >
+            {starting ? 'Preparando…' : intentos.usados === 0 ? 'Jugar' : 'Jugar mi última partida'}
+          </button>
+        )}
         <BotonCompartir />
         <BotonComunidad />
       </div>

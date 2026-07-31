@@ -165,6 +165,21 @@ artículo (`COMPANY_SIZE_ARTICLE`) para que la frase concuerde: "construiste
   algún día hace falta, el middleware que lo resolvía está en el historial de
   git (commit `b335aa2`).
 
+### 2.8 Intentos por jugador
+- Cada persona tiene **2 partidas**, ni una más (`GAME_RULES.MAX_INTENTOS`).
+- **Se cuenta al abrir la partida, no al guardarla.** Si contáramos solo las
+  guardadas, cualquiera podría jugar, ver un puntaje bajo, no guardarlo y
+  volver a empezar indefinidamente. El costo de esta decisión es que abandonar
+  una partida a medias gasta el intento: es el precio de que el límite sea real.
+- El tope lo aplica **el servidor** en `POST /api/sessions` (403 al pedir la
+  tercera). La interfaz solo refleja lo que el servidor reporta: esconder el
+  botón no es la protección (§4.1).
+- Se guarda **el puntaje más alto**, no el último ni la suma: el leaderboard ya
+  toma el mejor por jugador (§3.1).
+- Mensajes: tras la primera partida, *"Te queda una oportunidad más. Se guarda
+  tu puntaje más alto."*; al agotarlas, desaparece el botón de jugar y quedan
+  los de compartir y comunidad.
+
 ---
 
 ## 3. Arquitectura

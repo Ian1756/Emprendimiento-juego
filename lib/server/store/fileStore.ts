@@ -111,6 +111,11 @@ export const fileStore: Store = {
     return session;
   },
 
+  async countGameSessions(playerId) {
+    const database = await load();
+    return database.sessions.filter((session) => session.playerId === playerId).length;
+  },
+
   async findGameSession(id) {
     const database = await load();
     return database.sessions.find((session) => session.id === id) ?? null;

@@ -4,6 +4,7 @@
  * y precarga el Top 5 para que la primera pantalla no parpadee.
  */
 import Juego from '@/components/Juego';
+import { intentosDe } from '@/lib/game/intentos';
 import { GAME_RULES } from '@/lib/game/rules';
 import { logServerError } from '@/lib/server/http';
 import { currentPlayerId } from '@/lib/server/session';
@@ -22,20 +23,28 @@ async function cargarDatosIniciales() {
     const playerId = await currentPlayerId();
     const player = playerId ? await store.findPlayerById(playerId) : null;
 
-    const [entries, standing] = await Promise.all([
+    const [entries, standing, usados] = await Promise.all([
       store.topScores(GAME_RULES.LEADERBOARD_SIZE),
       player ? store.standingFor(player.id) : Promise.resolve(null),
+      player ? store.countGameSessions(player.id) : Promise.resolve(0),
     ]);
 
-    return { playerName: player?.displayName ?? null, entries, standing };
+    return {
+      playerName: player?.displayName ?? null,
+      entries,
+      standing,
+      intentos: intentosDe(usados),
+    };
   } catch (error) {
     logServerError('page.inicial', error);
-    return { playerName: null, entries: [], standing: null };
+    return { playerName: null, entries: [], standing: null, intentos: intentosDe(0) };
   }
 }
 
 export default async function Page() {
   // Al cliente solo le llega el nombre público: el correo nunca sale (§4.5).
-  const { playerName, entries, standing } = await cargarDatosIniciales();
-  return <Juego playerName={playerName} entries={entries} standing={standing} />;
+  const { playerName, entries, standing, intentos } = await cargarDatosIniciales();
+  return (
+    <Juego playerName={playerName} entries={entries} standing={standing} intentos={intentos} />
+  );
 }

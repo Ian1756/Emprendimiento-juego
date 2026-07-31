@@ -1,5 +1,6 @@
 /** Top 5 público — INSTRUCCIONES.md §2.2. Solo lectura, sin datos personales. */
 import { NextResponse } from 'next/server';
+import { intentosDe } from '@/lib/game/intentos';
 import { GAME_RULES } from '@/lib/game/rules';
 import { GENERIC_ERROR_MESSAGE, jsonError, logServerError, tooManyRequests } from '@/lib/server/http';
 import { checkRateLimit, clientIp } from '@/lib/server/rateLimit';
@@ -17,13 +18,14 @@ export async function GET(request: Request) {
     const store = await getStore();
     const playerId = await currentPlayerId();
 
-    const [entries, standing] = await Promise.all([
+    const [entries, standing, usados] = await Promise.all([
       store.topScores(GAME_RULES.LEADERBOARD_SIZE),
       playerId ? store.standingFor(playerId) : Promise.resolve(null),
+      playerId ? store.countGameSessions(playerId) : Promise.resolve(0),
     ]);
 
     return NextResponse.json(
-      { entries, standing },
+      { entries, standing, intentos: intentosDe(usados) },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

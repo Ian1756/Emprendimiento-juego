@@ -60,6 +60,8 @@ export interface Store {
   createPlayer(input: { displayName: string; email: string; matricula: string }): Promise<Player>;
 
   createGameSession(input: { playerId: string; seed: number }): Promise<GameSession>;
+  /** Partidas abiertas por el jugador: define cuántos intentos le quedan. */
+  countGameSessions(playerId: string): Promise<number>;
   findGameSession(id: string): Promise<GameSession | null>;
   closeGameSession(id: string, status: Exclude<SessionStatus, 'open'>): Promise<void>;
 

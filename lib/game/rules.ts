@@ -32,6 +32,8 @@ export const GAME_RULES = {
   SIZE_THRESHOLD_UNICORN: 6_000,
 
   LEADERBOARD_SIZE: 5,
+  /** Partidas por persona. Se cuenta al ABRIR la partida, no al guardarla. */
+  MAX_INTENTOS: 2,
 
   PLAYER_NAME_MIN: 2,
   PLAYER_NAME_MAX: 40,

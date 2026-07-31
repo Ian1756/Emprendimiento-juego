@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type { ApiError, SubmitScoreResponse } from '@/lib/apiTypes';
 import { companyFor } from '@/lib/game/company';
 import type { Move } from '@/lib/game/engine';
+import { mensajeDeIntentos, type Intentos } from '@/lib/game/intentos';
 import { GAME_RULES, TILE_COLORS } from '@/lib/game/rules';
 import { publicConfig } from '@/lib/config';
 import { BotonComunidad, BotonCompartir } from './BotonesComunidad';
@@ -27,6 +28,7 @@ export interface RunSummary {
 
 interface Props {
   run: RunSummary;
+  intentos: Intentos;
   onSaved: (result: SubmitScoreResponse) => void;
   onPlayAgain: () => void;
 }
@@ -63,7 +65,7 @@ function Desglose({ colorCounts }: { colorCounts: number[] }) {
   );
 }
 
-export default function PantallaResultado({ run, onSaved, onPlayAgain }: Props) {
+export default function PantallaResultado({ run, intentos, onSaved, onPlayAgain }: Props) {
   const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -74,6 +76,9 @@ export default function PantallaResultado({ run, onSaved, onPlayAgain }: Props) 
   const company = saved?.company ?? preview;
   const score = saved?.score ?? run.score;
   const esUnicornio = company.size === 'unicornio';
+  // Los intentos que devuelve el servidor al guardar son la fuente de verdad.
+  const intentosTrasGuardar = saved?.intentos ?? intentos;
+  const puedeRepetir = intentosTrasGuardar.restantes > 0;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -154,6 +159,13 @@ export default function PantallaResultado({ run, onSaved, onPlayAgain }: Props) 
               {saved.standing.bestScore.toLocaleString('es-MX')} pts.
             </p>
           ) : null}
+
+          {/* Aviso de intentos: es lo primero que quiere saber quien acaba de
+              terminar su primera partida. */}
+          <p className="mt-3 rounded-xl border border-[var(--borde)] bg-black/25 p-2.5 text-sm font-semibold">
+            {mensajeDeIntentos(intentosTrasGuardar)}
+          </p>
+
           <p className="mt-4 text-lg font-bold">¿Quieres hacer esto en la vida real?</p>
           <p className="text-sm text-[var(--texto-suave)]">
             Conecta con {publicConfig.organization} y convierte tu idea en una empresa de verdad.
@@ -162,7 +174,7 @@ export default function PantallaResultado({ run, onSaved, onPlayAgain }: Props) 
             <BotonComunidad label="Conectar por WhatsApp" />
             <BotonCompartir />
             <button className="boton boton-secundario" type="button" onClick={onPlayAgain}>
-              Volver a jugar
+              {puedeRepetir ? 'Usar mi última oportunidad' : 'Volver al inicio'}
             </button>
           </div>
         </section>

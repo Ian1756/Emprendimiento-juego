@@ -136,6 +136,14 @@ export const postgresStore: Store = {
     return toSession(row);
   },
 
+  async countGameSessions(playerId) {
+    const result = await db().query<{ total: string }>(
+      'select count(*)::text as total from game_sessions where player_id = $1',
+      [playerId],
+    );
+    return Number(result.rows[0]?.total ?? 0);
+  },
+
   async findGameSession(id) {
     const result = await db().query<SessionRow>('select * from game_sessions where id = $1', [id]);
     const row = result.rows[0];

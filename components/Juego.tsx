@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import type { ApiError, LeaderboardResponse, StartSessionResponse, SubmitScoreResponse } from '@/lib/apiTypes';
+import type { Intentos } from '@/lib/game/intentos';
 import type { LeaderboardEntry, PlayerStanding } from '@/lib/server/store/types';
 import PantallaInicio from './PantallaInicio';
 import PantallaJuego, { type RunOutcome } from './PantallaJuego';
@@ -23,13 +24,15 @@ interface Props {
   playerName: string | null;
   entries: LeaderboardEntry[];
   standing: PlayerStanding | null;
+  intentos: Intentos;
 }
 
-export default function Juego({ playerName, entries, standing }: Props) {
+export default function Juego({ playerName, entries, standing, intentos }: Props) {
   const [screen, setScreen] = useState<Pantalla>(playerName ? 'inicio' : 'registro');
   const [name, setName] = useState(playerName ?? '');
   const [leaderboard, setLeaderboard] = useState(entries);
   const [playerStanding, setPlayerStanding] = useState(standing);
+  const [intentosActuales, setIntentos] = useState(intentos);
   const [run, setRun] = useState<ActiveRun | null>(null);
   const [summary, setSummary] = useState<RunSummary | null>(null);
   const [starting, setStarting] = useState(false);
@@ -42,6 +45,7 @@ export default function Juego({ playerName, entries, standing }: Props) {
       const data = (await response.json()) as LeaderboardResponse;
       setLeaderboard(data.entries);
       setPlayerStanding(data.standing);
+      setIntentos(data.intentos);
     } catch {
       // El tablero anterior sigue siendo válido; no interrumpimos al jugador.
     }
@@ -68,6 +72,7 @@ export default function Juego({ playerName, entries, standing }: Props) {
       }
 
       const session = data as StartSessionResponse;
+      setIntentos(session.intentos);
       setRun({ sessionId: session.sessionId, seed: session.seed });
       setSummary(null);
       setScreen('jugando');
@@ -87,6 +92,7 @@ export default function Juego({ playerName, entries, standing }: Props) {
   function handleSaved(result: SubmitScoreResponse): void {
     setLeaderboard(result.leaderboard);
     setPlayerStanding(result.standing);
+    setIntentos(result.intentos);
   }
 
   function handlePlayAgain(): void {
@@ -103,7 +109,12 @@ export default function Juego({ playerName, entries, standing }: Props) {
 
   if (screen === 'resultado' && summary) {
     return (
-      <PantallaResultado run={summary} onSaved={handleSaved} onPlayAgain={handlePlayAgain} />
+      <PantallaResultado
+        run={summary}
+        intentos={intentosActuales}
+        onSaved={handleSaved}
+        onPlayAgain={handlePlayAgain}
+      />
     );
   }
 
@@ -112,6 +123,7 @@ export default function Juego({ playerName, entries, standing }: Props) {
       playerName={name}
       entries={leaderboard}
       standing={playerStanding}
+      intentos={intentosActuales}
       starting={starting}
       error={error}
       onPlay={() => void handlePlay()}

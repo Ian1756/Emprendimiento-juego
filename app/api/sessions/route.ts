@@ -5,6 +5,8 @@
  */
 import { NextResponse } from 'next/server';
 import { randomInt } from 'node:crypto';
+import { intentosDe } from '@/lib/game/intentos';
+import { GAME_RULES } from '@/lib/game/rules';
 import {
   GENERIC_ERROR_MESSAGE,
   jsonError,
@@ -31,8 +33,18 @@ export async function POST() {
     const store = await getStore();
     if (!(await store.findPlayerById(playerId))) return jsonError(UNAUTHORIZED_MESSAGE, 401);
 
+    // El tope de partidas se aplica AQUÍ, no en el navegador (§4.1).
+    const usados = await store.countGameSessions(playerId);
+    if (usados >= GAME_RULES.MAX_INTENTOS) {
+      return jsonError('Ya usaste tus dos partidas. ¡Gracias por jugar!', 403);
+    }
+
     const session = await store.createGameSession({ playerId, seed: randomInt(MAX_SEED) });
-    return NextResponse.json({ sessionId: session.id, seed: session.seed });
+    return NextResponse.json({
+      sessionId: session.id,
+      seed: session.seed,
+      intentos: intentosDe(usados + 1),
+    });
   } catch (error) {
     logServerError('sessions.POST', error);
     return jsonError(GENERIC_ERROR_MESSAGE, 500);
