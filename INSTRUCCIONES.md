@@ -266,10 +266,17 @@ El navegador puede mandar `score: 999999999`. Por eso:
 4. El servidor **re-simula** la partida con la misma semilla y el mismo motor puro
    de `lib/game/` y calcula el puntaje él mismo. **El puntaje que cuenta es el del
    servidor**, el del cliente se ignora.
-5. Rechazos automáticos: sesión ya cerrada, sesión de otro jugador, `ended_at -
-   started_at > 75 s` (60 s + margen de red), movimientos imposibles, más
-   movimientos de los que caben en 60 s.
-6. Si la re-simulación resulta cara, el mínimo aceptable es: validar techo de
+5. Rechazos automáticos: sesión ya cerrada, sesión de otro jugador, movimientos
+   imposibles, y más de `MAX_MOVES` movimientos.
+6. **El reloj NO es una defensa.** El plazo para enviar (`SUBMIT_WINDOW_SECONDS`,
+   10 min) solo descarta partidas abandonadas. Tiene que cubrir los 60 s de
+   juego **más** lo que tarda una persona en nombrar su empresa: un plazo corto
+   solo le quita el puntaje a quien se tarda pensando, sin estorbarle a un
+   cliente manipulado, que puede enviar cuando quiera. *Bug real del
+   2026-07-27: con 75 s, cualquiera que tardara más de 15 s nombrando su
+   empresa perdía la partida.* Lo que sí acota el abuso es `MAX_MOVES`, fijado
+   en un techo que un humano no alcanza en 60 s.
+7. Si la re-simulación resulta cara, el mínimo aceptable es: validar techo de
    puntaje por tiempo (`score <= MAX_PPS * segundos`) + un movimiento por sesión +
    sesión de un solo uso. **Nunca** aceptar el puntaje crudo sin ninguna validación.
 

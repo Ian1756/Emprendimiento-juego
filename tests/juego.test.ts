@@ -153,6 +153,32 @@ test('rechaza más movimientos de los que caben en una partida', () => {
   assert.equal(replayGame(1, moves).valid, false);
 });
 
+/**
+ * Regresión del bug del 2026-07-27: el plazo para enviar el puntaje tiene que
+ * cubrir la partida MÁS el tiempo que tarda una persona en nombrar su empresa.
+ * Con 75 s, quien se tardaba pensando perdía su puntaje.
+ */
+test('el plazo para enviar deja tiempo de sobra para nombrar la empresa', () => {
+  const holguraSegundos = GAME_RULES.SUBMIT_WINDOW_SECONDS - GAME_RULES.DURATION_SECONDS;
+  assert.ok(
+    holguraSegundos >= 120,
+    `solo quedan ${holguraSegundos}s para nombrar la empresa y enviar; hacen falta al menos 120`,
+  );
+});
+
+test('el techo de movimientos sigue siendo inalcanzable para un humano', () => {
+  // ~0.42 s de animación por movimiento: el máximo humano ronda los 80.
+  const maximoHumano = Math.ceil(GAME_RULES.DURATION_SECONDS / 0.42);
+  assert.ok(
+    GAME_RULES.MAX_MOVES >= maximoHumano,
+    'el techo no puede quedar por debajo de lo que logra un jugador rápido',
+  );
+  assert.ok(
+    GAME_RULES.MAX_MOVES <= maximoHumano * 2,
+    'un techo demasiado alto deja margen a un cliente manipulado',
+  );
+});
+
 test('el tamaño de la empresa respeta los umbrales', () => {
   assert.equal(companyFor(0, [1, 0, 0, 0, 0]).size, 'pequena');
   assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_MEDIUM - 1, [1, 0, 0, 0, 0]).size, 'pequena');

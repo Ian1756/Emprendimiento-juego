@@ -9,10 +9,20 @@ export const GAME_RULES = {
   MIN_MATCH: 3,
 
   DURATION_SECONDS: 60,
-  /** Margen de red aceptado por el servidor al validar la duración (§4.1). */
-  GRACE_SECONDS: 15,
-  /** Techo de movimientos por partida; más que esto es imposible para un humano. */
-  MAX_MOVES: 300,
+  /**
+   * Plazo para enviar el puntaje desde que se abre la partida. Tiene que cubrir
+   * los 60 s de juego MÁS el tiempo que tarda una persona en pensar el nombre
+   * de su empresa y una red lenta. Es holgado a propósito: la protección real
+   * contra trampas es la re-simulación y el techo de movimientos, no el reloj
+   * (§4.1). Un plazo corto solo le quitaba el puntaje a quien se tardaba.
+   */
+  SUBMIT_WINDOW_SECONDS: 10 * 60,
+  /**
+   * Techo de movimientos por partida. Cada movimiento consume al menos ~0.4 s
+   * de animación, así que en 60 s nadie pasa de ~80. 150 deja el doble de
+   * margen y aun así acota lo que podría enviar un cliente manipulado.
+   */
+  MAX_MOVES: 150,
 
   POINTS_PER_TILE: 10,
   BONUS_MATCH_4: 30,
