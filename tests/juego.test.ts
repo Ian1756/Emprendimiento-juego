@@ -172,11 +172,27 @@ test('el techo de movimientos sigue siendo inalcanzable para un humano', () => {
 });
 
 test('el tamaño de la empresa respeta los umbrales', () => {
-  assert.equal(companyFor(0, [1, 0, 0, 0, 0]).size, 'pequena');
-  assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_MEDIUM - 1, [1, 0, 0, 0, 0]).size, 'pequena');
-  assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_MEDIUM, [1, 0, 0, 0, 0]).size, 'mediana');
-  assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_LARGE - 1, [1, 0, 0, 0, 0]).size, 'mediana');
-  assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_LARGE, [1, 0, 0, 0, 0]).size, 'grande');
+  const colores = [1, 0, 0, 0, 0];
+  const tamano = (score: number) => companyFor(score, colores).size;
+
+  assert.equal(tamano(0), 'pequena');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_MEDIUM - 1), 'pequena');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_MEDIUM), 'mediana');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_LARGE - 1), 'mediana');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_LARGE), 'grande');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_UNICORN - 1), 'grande');
+  assert.equal(tamano(GAME_RULES.SIZE_THRESHOLD_UNICORN), 'unicornio');
+  assert.equal(tamano(999_999), 'unicornio');
+
+  // Los umbrales tienen que ir en orden creciente o los rangos se solapan.
+  assert.ok(GAME_RULES.SIZE_THRESHOLD_MEDIUM < GAME_RULES.SIZE_THRESHOLD_LARGE);
+  assert.ok(GAME_RULES.SIZE_THRESHOLD_LARGE < GAME_RULES.SIZE_THRESHOLD_UNICORN);
+});
+
+test('cada tamaño tiene etiqueta y artículo que concuerdan', () => {
+  assert.equal(companyFor(0, [1, 0, 0, 0, 0]).sizeArticle, 'una');
+  assert.equal(companyFor(GAME_RULES.SIZE_THRESHOLD_UNICORN, [1, 0, 0, 0, 0]).sizeArticle, 'un');
+  assert.match(companyFor(GAME_RULES.SIZE_THRESHOLD_UNICORN, [1, 0, 0, 0, 0]).sizeLabel, /Unicornio/);
 });
 
 test('el rubro sale del color dominante y desempata de forma determinista', () => {

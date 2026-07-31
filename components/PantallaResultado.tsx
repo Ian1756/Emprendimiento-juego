@@ -103,7 +103,7 @@ export default function PantallaResultado({ run, onSaved, onPlayAgain }: Props) 
           {company.icon}
         </p>
         <p className="mt-1 text-sm uppercase tracking-wide text-[var(--texto-suave)]">
-          Construiste una
+          Construiste {company.sizeArticle}
         </p>
         <h1 className="text-2xl font-extrabold">{company.sizeLabel}</h1>
         <p className="mt-1 text-lg font-bold text-[var(--acento)]">{company.type}</p>

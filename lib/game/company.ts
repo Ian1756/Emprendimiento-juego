@@ -3,6 +3,7 @@
  * Lo calculan cliente y servidor con esta misma función.
  */
 import {
+  COMPANY_SIZE_ARTICLE,
   COMPANY_SIZE_LABEL,
   companySizeForScore,
   dominantColorIndex,
@@ -14,6 +15,8 @@ import {
 export interface CompanyResult {
   size: CompanySize;
   sizeLabel: string;
+  /** "una" o "un", para que la frase concuerde con la etiqueta. */
+  sizeArticle: string;
   colorIndex: number;
   colorLabel: string;
   type: string;
@@ -29,6 +32,7 @@ export function companyFor(score: number, colorCounts: ColorCounts): CompanyResu
   return {
     size,
     sizeLabel: COMPANY_SIZE_LABEL[size],
+    sizeArticle: COMPANY_SIZE_ARTICLE[size],
     colorIndex,
     colorLabel: color.label,
     type: color.company,

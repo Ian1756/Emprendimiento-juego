@@ -118,12 +118,17 @@ Se lleva además un **contador por color** de fichas eliminadas: define el rubro
 
 | Puntaje final | Tamaño |
 |---|---|
-| < 1,500 | Pequeña empresa |
-| 1,500 – 3,999 | Mediana empresa |
-| ≥ 4,000 | Gran empresa |
+| < 2,000 | Pequeña empresa |
+| 2,000 – 3,299 | Mediana empresa |
+| 3,300 – 5,999 | Gran empresa |
+| ≥ 6,000 | Unicornio 🦄 |
 
 Los umbrales viven en **una sola constante compartida** (`GAME_RULES`), nunca
-duplicados en cliente y servidor por copiar-pegar.
+duplicados en cliente y servidor por copiar-pegar. Cada tamaño lleva además su
+artículo (`COMPANY_SIZE_ARTICLE`) para que la frase concuerde: "construiste
+**una** gran empresa" pero "construiste **un** unicornio".
+
+*Calibrado el 2026-07-27 por la organización, para partidas de 90 s.*
 
 ### 2.6 Resultado, nombre y cierre
 1. Pantalla de resultado: puntaje, tamaño, rubro, desglose por color.

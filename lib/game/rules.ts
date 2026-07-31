@@ -27,8 +27,9 @@ export const GAME_RULES = {
   BONUS_MATCH_5_PLUS: 80,
   CASCADE_MULTIPLIERS: [1, 1.5, 2, 2.5, 3] as const,
 
-  SIZE_THRESHOLD_MEDIUM: 1_500,
-  SIZE_THRESHOLD_LARGE: 4_000,
+  SIZE_THRESHOLD_MEDIUM: 2_000,
+  SIZE_THRESHOLD_LARGE: 3_300,
+  SIZE_THRESHOLD_UNICORN: 6_000,
 
   LEADERBOARD_SIZE: 5,
 
@@ -40,12 +41,21 @@ export const GAME_RULES = {
 
 export const TILE_COUNT = GAME_RULES.ROWS * GAME_RULES.COLS;
 
-export type CompanySize = 'pequena' | 'mediana' | 'grande';
+export type CompanySize = 'pequena' | 'mediana' | 'grande' | 'unicornio';
 
 export const COMPANY_SIZE_LABEL: Record<CompanySize, string> = {
   pequena: 'Pequeña empresa',
   mediana: 'Mediana empresa',
   grande: 'Gran empresa',
+  unicornio: 'Unicornio 🦄',
+};
+
+/** Artículo que acompaña a cada etiqueta: "construiste **una** pequeña empresa". */
+export const COMPANY_SIZE_ARTICLE: Record<CompanySize, string> = {
+  pequena: 'una',
+  mediana: 'una',
+  grande: 'una',
+  unicornio: 'un',
 };
 
 /**
@@ -118,6 +128,7 @@ export function cascadeMultiplier(cascadeIndex: number): number {
 }
 
 export function companySizeForScore(score: number): CompanySize {
+  if (score >= GAME_RULES.SIZE_THRESHOLD_UNICORN) return 'unicornio';
   if (score >= GAME_RULES.SIZE_THRESHOLD_LARGE) return 'grande';
   if (score >= GAME_RULES.SIZE_THRESHOLD_MEDIUM) return 'mediana';
   return 'pequena';
