@@ -351,8 +351,25 @@ aproximado). No hay endpoint que diga "¿existe este correo?".
 - **Toda** entrada se valida en el servidor con un esquema (Zod o equivalente).
   Validar en el cliente es UX, no seguridad; se hace en ambos lados.
 - Nombres: longitud acotada, sin caracteres de control, sin URLs, se hace `trim` y
-  se colapsan espacios. Filtro de palabras altisonantes básico — el leaderboard es
-  público y proyectado en pantalla, un nombre obsceno es un incidente.
+  se colapsan espacios.
+- **Filtro de groserías** (`lib/server/palabrasProhibidas.ts`): el leaderboard se
+  proyecta en pantalla, así que un nombre obsceno es un incidente. La lista sale
+  de LDNOOBW (Shutterstock, CC BY 4.0) en español e inglés, curada a mano:
+  - Se **quitaron** entradas que en México son palabras legítimas —*concha*
+    (pan dulce y apodo de Concepción), *martillo*, *heroína*, *infierno*,
+    *drogas*, *asno*, *trío*—: bloquear a alguien con nombre válido es peor que
+    dejar pasar una palabra suave.
+  - Se **agregaron** groserías mexicanas que la lista no traía (la original en
+    español tiene solo 68 entradas y es peninsular).
+  - La comparación es por **palabra completa, nunca por subcadena**. Con
+    subcadena quedarían bloqueados "Cassandra" (*ass*), "computadora" y
+    "disputas" (*puta*), "cálculo" (*culo*), "análisis" (*anal*) y "Titán"
+    (*tit*). **No lo cambies a `includes`.**
+  - Se normaliza para detectar disfraces: acentos, mayúsculas, leet (`put0`,
+    `pu70`), letras repetidas (`puuuto`), camelCase (`PutoElQueLoLea`) y
+    letra por letra (`p u t o`).
+  - Hay pruebas de las dos direcciones: que rechace groserías y que **no**
+    rechace nombres legítimos. Al tocar la lista, corre `npm test`.
 - **Nunca** `dangerouslySetInnerHTML` con nombres de jugador o de empresa. React
   escapa por defecto; no lo desactives.
 - SQL siempre parametrizado / vía ORM. Cero concatenación de strings.

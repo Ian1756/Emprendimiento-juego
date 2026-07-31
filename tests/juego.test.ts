@@ -21,7 +21,7 @@ import { companyFor } from '../lib/game/company';
 import { Rng } from '../lib/game/rng';
 import { GAME_RULES, TILE_COUNT, dominantColorIndex } from '../lib/game/rules';
 import { cellsClearedByRuns, pointsForRuns } from '../lib/game/scoring';
-import { registerSchema } from '../lib/server/validation';
+import { registerSchema, submitScoreSchema } from '../lib/server/validation';
 
 function boardOfColor(color: number): Board {
   return new Array<number>(TILE_COUNT).fill(color);
@@ -208,9 +208,103 @@ test('un tablero de un solo color siempre tiene movimientos', () => {
 
 const REGISTRO_BASE = {
   name: 'Ana Prueba',
+  matricula: 'A01234567',
   email: 'ana@ejemplo.mx',
   consent: true as const,
 };
+
+/** Intenta registrar ese nombre y dice si el servidor lo aceptó. */
+function nombreAceptado(name: string): boolean {
+  return registerSchema.safeParse({ ...REGISTRO_BASE, name }).success;
+}
+
+test('rechaza groserías en español y en inglés en el nombre', () => {
+  const groserias = [
+    'puto',
+    'Puta',
+    'pendejo',
+    'PENDEJA',
+    'culero',
+    'chinga',
+    'mamón',
+    'joto',
+    'panocha',
+    'verga',
+    'mierda',
+    'fuck',
+    'Shit Company',
+    'asshole',
+    'bitch',
+    'Hija de puta',
+    'Juan el pendejo',
+  ];
+
+  for (const texto of groserias) {
+    assert.equal(nombreAceptado(texto), false, `deberia rechazar: ${texto}`);
+  }
+});
+
+test('detecta groserías disfrazadas con acentos, números o repeticiones', () => {
+  const disfraces = ['pütó', 'put0', 'pu70', 'puuuuto', 'PutoElQueLoLea', 'p u t o', 'm1erda'];
+
+  for (const texto of disfraces) {
+    assert.equal(nombreAceptado(texto), false, `deberia rechazar: ${texto}`);
+  }
+
+  // El leet no debe inventar groserías donde no las hay: "p4to" es "pato".
+  assert.equal(nombreAceptado('p4to'), true);
+});
+
+/**
+ * La prueba que más importa: el filtro no puede dejar fuera a gente con nombre
+ * legítimo. Por eso la comparación es por palabra completa y no por subcadena.
+ */
+test('no bloquea nombres ni palabras legítimas', () => {
+  const legitimos = [
+    'Ana',
+    'María José',
+    'Concepción',
+    'Concha',
+    'Sánchez',
+    'Espinosa',
+    'Villalobos',
+    'Peña',
+    'Cassandra',
+    'Computadora MX',
+    'Cálculo Fino',
+    'Análisis Total',
+    'Titán',
+    'Grass Verde',
+    'Sexto Sentido',
+    'Martillo SA',
+    'Heroína del Barrio',
+    'Trío Norteño',
+    'Dolores',
+    'Socorro',
+    'Ángeles',
+    'Regina',
+  ];
+
+  for (const texto of legitimos) {
+    assert.equal(nombreAceptado(texto), true, `deberia aceptar: ${texto}`);
+  }
+});
+
+test('el mismo filtro aplica al nombre de la empresa', () => {
+  const conGroseria = submitScoreSchema.safeParse({
+    sessionId: '11111111-1111-4111-8111-111111111111',
+    companyName: 'Putos SA',
+    moves: [],
+  });
+  assert.equal(conGroseria.success, false);
+
+  const limpio = submitScoreSchema.safeParse({
+    sessionId: '11111111-1111-4111-8111-111111111111',
+    companyName: 'Raíces MX',
+    moves: [],
+  });
+  assert.equal(limpio.success, true);
+});
 
 test('la matrícula es obligatoria y debe empezar con A0', () => {
   const validas = ['A01234567', 'a01234567', ' a01234567 ', 'A0123456'];
@@ -226,7 +320,8 @@ test('la matrícula es obligatoria y debe empezar con A0', () => {
   }
 
   // Falta el campo por completo
-  assert.equal(registerSchema.safeParse(REGISTRO_BASE).success, false);
+  const { matricula: _omitida, ...sinMatricula } = REGISTRO_BASE;
+  assert.equal(registerSchema.safeParse(sinMatricula).success, false);
 });
 
 test('la matrícula se guarda normalizada en mayúsculas', () => {
