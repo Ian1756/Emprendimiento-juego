@@ -23,7 +23,6 @@ import { firstIssueMessage, submitScoreSchema } from '@/lib/server/validation';
 
 const LIMIT_PER_HOUR = 20;
 const ONE_HOUR_SECONDS = 60 * 60;
-const SUBMIT_WINDOW_MS = GAME_RULES.SUBMIT_WINDOW_SECONDS * 1000;
 const REJECTED_MESSAGE = 'No pudimos validar esta partida. Vuelve a jugar.';
 
 export async function POST(request: Request) {
@@ -53,14 +52,9 @@ export async function POST(request: Request) {
     if (!session || session.playerId !== playerId) return jsonError(REJECTED_MESSAGE, 403);
     if (session.status !== 'open') return jsonError('Esta partida ya se guardó.', 409);
 
-    // Solo descarta partidas abandonadas hace mucho: el plazo es holgado para
-    // que nadie pierda su puntaje por tardarse nombrando su empresa (§4.1).
-    const elapsedMs = Date.now() - Date.parse(session.startedAt);
-    if (elapsedMs > SUBMIT_WINDOW_MS) {
-      await store.closeGameSession(session.id, 'rejected');
-      return jsonError('Esta partida es muy vieja. Juega otra para guardar tu puntaje.', 422);
-    }
-
+    // Sin límite de tiempo para enviar: la persona nombra su empresa con
+    // calma. Lo que acota el abuso es la re-simulación y el techo de
+    // movimientos, no el reloj (§4.1).
     const replay = replayGame(session.seed, moves);
     if (!replay.valid) {
       await store.closeGameSession(session.id, 'rejected');

@@ -8,21 +8,19 @@ export const GAME_RULES = {
   COLS: 8,
   MIN_MATCH: 3,
 
-  DURATION_SECONDS: 60,
+  DURATION_SECONDS: 90,
   /**
-   * Plazo para enviar el puntaje desde que se abre la partida. Tiene que cubrir
-   * los 60 s de juego MÁS el tiempo que tarda una persona en pensar el nombre
-   * de su empresa y una red lenta. Es holgado a propósito: la protección real
-   * contra trampas es la re-simulación y el techo de movimientos, no el reloj
-   * (§4.1). Un plazo corto solo le quitaba el puntaje a quien se tardaba.
+   * No hay plazo para enviar el puntaje: la persona se toma el tiempo que
+   * quiera nombrando su empresa (§4.1). El reloj nunca protegió de nada —un
+   * cliente manipulado envía cuando quiere—, así que lo único que hacía un
+   * plazo corto era quitarle la partida a quien se tardaba pensando.
+   *
+   * Techo de movimientos por partida. Cada movimiento consume al menos ~0.42 s
+   * de animación, así que en 90 s nadie pasa de ~215. 250 deja margen para un
+   * jugador rapidísimo y aun así acota lo que podría enviar un cliente
+   * manipulado: es la defensa que sí sirve.
    */
-  SUBMIT_WINDOW_SECONDS: 10 * 60,
-  /**
-   * Techo de movimientos por partida. Cada movimiento consume al menos ~0.4 s
-   * de animación, así que en 60 s nadie pasa de ~80. 150 deja el doble de
-   * margen y aun así acota lo que podría enviar un cliente manipulado.
-   */
-  MAX_MOVES: 150,
+  MAX_MOVES: 250,
 
   POINTS_PER_TILE: 10,
   BONUS_MATCH_4: 30,

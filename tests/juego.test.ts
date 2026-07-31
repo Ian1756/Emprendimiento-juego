@@ -154,20 +154,12 @@ test('rechaza más movimientos de los que caben en una partida', () => {
 });
 
 /**
- * Regresión del bug del 2026-07-27: el plazo para enviar el puntaje tiene que
- * cubrir la partida MÁS el tiempo que tarda una persona en nombrar su empresa.
- * Con 75 s, quien se tardaba pensando perdía su puntaje.
+ * Regresión del bug del 2026-07-27: cualquier límite de tiempo para enviar el
+ * puntaje castiga a quien se tarda nombrando su empresa, sin estorbarle a un
+ * cliente manipulado. La defensa correcta es el techo de movimientos (§4.1).
  */
-test('el plazo para enviar deja tiempo de sobra para nombrar la empresa', () => {
-  const holguraSegundos = GAME_RULES.SUBMIT_WINDOW_SECONDS - GAME_RULES.DURATION_SECONDS;
-  assert.ok(
-    holguraSegundos >= 120,
-    `solo quedan ${holguraSegundos}s para nombrar la empresa y enviar; hacen falta al menos 120`,
-  );
-});
-
 test('el techo de movimientos sigue siendo inalcanzable para un humano', () => {
-  // ~0.42 s de animación por movimiento: el máximo humano ronda los 80.
+  // ~0.42 s de animación por movimiento marca el máximo que alcanza un humano.
   const maximoHumano = Math.ceil(GAME_RULES.DURATION_SECONDS / 0.42);
   assert.ok(
     GAME_RULES.MAX_MOVES >= maximoHumano,

@@ -1,6 +1,6 @@
 # Reto Emprendedor — juego web por QR
 
-Juego *match-3* de 60 segundos para activaciones de **Emprendimiento Tec CEM**.
+Juego *match-3* de 90 segundos para activaciones de **Emprendimiento Tec CEM**.
 La especificación completa (reglas, seguridad, estilo de código) está en
 **[INSTRUCCIONES.md](INSTRUCCIONES.md)** — léela antes de tocar el código.
 

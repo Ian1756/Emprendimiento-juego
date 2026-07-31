@@ -55,8 +55,8 @@ export default function PantallaRegistro({ onRegistered }: Props) {
         <p className="text-5xl">🚀</p>
         <h1 className="mt-2 text-3xl font-extrabold">Reto Emprendedor</h1>
         <p className="mt-2 text-[var(--texto-suave)]">
-          60 segundos para juntar clientes, ideas, recursos, talento y pasión. Al final descubres
-          qué empresa construiste.
+          {GAME_RULES.DURATION_SECONDS} segundos para juntar clientes, ideas, recursos, talento y
+          pasión. Al final descubres qué empresa construiste.
         </p>
       </div>
 

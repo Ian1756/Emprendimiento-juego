@@ -13,7 +13,7 @@
 
 Juego web de una sola sesión, tipo *match-3* (estilo Candy Crush), pensado para
 activaciones presenciales: la gente escanea un **QR**, entra desde el celular,
-juega **60 segundos**, obtiene una "empresa" según su desempeño y se le invita a
+juega **90 segundos**, obtiene una "empresa" según su desempeño y se le invita a
 conectar con **Emprendimiento Tec CEM**.
 
 Objetivos de negocio, en orden:
@@ -38,7 +38,7 @@ Restricciones de diseño que se derivan de eso:
                                                  │  Top 5 leaderboard
                                                  │  [ JUGAR ]  [ Compartir ]  [ Comunidad WhatsApp ]
                                                  ▼
-                                          Partida (60 s)
+                                          Partida (90 s)
                                                  ▼
                                           Resultado: tamaño + rubro de empresa
                                                  ▼
@@ -76,8 +76,10 @@ Restricciones de diseño que se derivan de eso:
 
 ### 2.3 Partida
 - Tablero **8×8**, 5 colores.
-- Duración **60 s** exactos, cronómetro visible; empieza al primer render del
+- Duración **90 s** exactos, cronómetro visible; empieza al primer render del
   tablero, no antes.
+- Al terminar, la persona tiene **tiempo ilimitado** para nombrar su empresa
+  (§4.1, punto 6).
 - Mecánica: intercambiar dos fichas **adyacentes**; el movimiento solo es válido si
   produce una línea de **3 o más** del mismo color. Las fichas alineadas explotan,
   las de arriba caen y se rellena desde el techo.
@@ -189,7 +191,7 @@ db/schema.sql              → esquema de Postgres
 ```
 
 **Navegación:** las cuatro pantallas son estados de un componente cliente, no
-rutas distintas. Una partida de 60 s no debe cruzar una navegación (perdería el
+rutas distintas. Una partida de 90 s no debe cruzar una navegación (perdería el
 estado y metería latencia); la única ruta real es `/`.
 
 **Persistencia:** la app habla con la interfaz `Store`. Si hay `DATABASE_URL` usa
@@ -268,14 +270,14 @@ El navegador puede mandar `score: 999999999`. Por eso:
    servidor**, el del cliente se ignora.
 5. Rechazos automáticos: sesión ya cerrada, sesión de otro jugador, movimientos
    imposibles, y más de `MAX_MOVES` movimientos.
-6. **El reloj NO es una defensa.** El plazo para enviar (`SUBMIT_WINDOW_SECONDS`,
-   10 min) solo descarta partidas abandonadas. Tiene que cubrir los 60 s de
-   juego **más** lo que tarda una persona en nombrar su empresa: un plazo corto
-   solo le quita el puntaje a quien se tarda pensando, sin estorbarle a un
-   cliente manipulado, que puede enviar cuando quiera. *Bug real del
-   2026-07-27: con 75 s, cualquiera que tardara más de 15 s nombrando su
-   empresa perdía la partida.* Lo que sí acota el abuso es `MAX_MOVES`, fijado
-   en un techo que un humano no alcanza en 60 s.
+6. **NO hay límite de tiempo para enviar el puntaje, y es a propósito.** El
+   reloj nunca fue una defensa: un cliente manipulado envía cuando quiere, así
+   que un plazo corto solo le quita la partida a quien se tarda pensando el
+   nombre de su empresa. *Bug real del 2026-07-27: con 75 s, cualquiera que
+   tardara más de 15 s nombrando su empresa perdía su puntaje.* Lo que sí acota
+   el abuso es `MAX_MOVES`, fijado en un techo que un humano no alcanza en el
+   tiempo de la partida. **No vuelvas a agregar una validación por tiempo
+   creyendo que endurece algo.**
 7. Si la re-simulación resulta cara, el mínimo aceptable es: validar techo de
    puntaje por tiempo (`score <= MAX_PPS * segundos`) + un movimiento por sesión +
    sesión de un solo uso. **Nunca** aceptar el puntaje crudo sin ninguna validación.

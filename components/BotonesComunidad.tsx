@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { publicConfig } from '@/lib/config';
+import { GAME_RULES } from '@/lib/game/rules';
 
 const CONFIRMATION_MS = 2_000;
 
@@ -14,7 +15,7 @@ export function BotonCompartir() {
 
   async function share(): Promise<void> {
     const url = window.location.origin;
-    const text = '¿Cuánto aguantas emprendiendo 60 segundos? Juega el Reto Emprendedor:';
+    const text = `¿Cuánto aguantas emprendiendo ${GAME_RULES.DURATION_SECONDS} segundos? Juega el Reto Emprendedor:`;
 
     try {
       if (navigator.share) {
