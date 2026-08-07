@@ -8,6 +8,7 @@ import type { LeaderboardEntry, PlayerStanding } from '@/lib/server/store/types'
 import { BotonComunidad, BotonCompartir } from './BotonesComunidad';
 import { IconoIngrediente } from './IconosJuego';
 import Leaderboard from './Leaderboard';
+import LogoJuego from './LogoJuego';
 import LogoTec from './LogoTec';
 
 interface Props {
@@ -37,8 +38,8 @@ export default function PantallaInicio({
   return (
     <main className="pantalla">
       <header className="entra text-center" style={orden(0)}>
-        <LogoTec />
-        <h1 className="mt-3 text-2xl font-extrabold">Hola, {playerName}</h1>
+        <LogoJuego tamano="compacto" />
+        <h1 className="mt-2 text-2xl font-extrabold">Hola, {playerName}</h1>
         <p className="text-sm text-[var(--texto-suave)]">
           {intentos.usados === 0
             ? `Tienes ${GAME_RULES.DURATION_SECONDS} segundos para construir tu empresa.`
@@ -91,6 +92,10 @@ export default function PantallaInicio({
         )}
         <BotonCompartir />
         <BotonComunidad />
+      </div>
+
+      <div className="pie-marca !mt-3">
+        <LogoTec discreto />
       </div>
     </main>
   );

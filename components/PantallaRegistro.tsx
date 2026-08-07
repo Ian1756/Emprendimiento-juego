@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { publicConfig } from '@/lib/config';
 import { GAME_RULES } from '@/lib/game/rules';
+import LogoJuego from './LogoJuego';
 import LogoTec from './LogoTec';
 
 interface Props {
@@ -53,12 +54,14 @@ export default function PantallaRegistro({ onRegistered }: Props) {
   return (
     <main className="pantalla justify-center">
       <div className="entra text-center" style={{ '--i': 0 } as React.CSSProperties}>
-        <LogoTec tamano="grande" />
-        <h1 className="mt-4 text-3xl font-extrabold">Reto Emprendedor</h1>
-        <p className="mt-2 text-[var(--texto-suave)]">
+        <LogoJuego tamano="hero" />
+        <p className="mt-3 text-[var(--texto-suave)]">
           {GAME_RULES.DURATION_SECONDS} segundos para juntar clientes, ideas, recursos, talento y
           pasión. Al final descubres qué empresa construiste.
         </p>
+        <div className="mt-4">
+          <LogoTec />
+        </div>
       </div>
 
       <form

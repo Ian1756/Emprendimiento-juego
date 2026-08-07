@@ -118,6 +118,23 @@ body {
   justify-content: center;
 }
 
+/* ---------- Logo del juego ---------- */
+/* El fondo del logo se volvió transparente al convertirlo, así que no lleva
+   recuadro ni radio: se apoya directo sobre el fondo de la app. */
+.logo-juego {
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+.logo-juego-hero {
+  width: min(78%, 20rem);
+}
+
+.logo-juego-compacto {
+  width: min(52%, 12rem);
+}
+
 /* ---------- Superficies ---------- */
 .tarjeta {
   background: linear-gradient(180deg, var(--fondo-suave), var(--fondo-alto));
